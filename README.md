@@ -500,4 +500,3 @@ Stated honestly, because the viva will ask.
   Use `NOTIFICATION_REDIRECT_TO` for demonstrations. The integration itself is real: a genuine HTTPS
   call, a real message id on success, and a recorded `Failed` row with the provider's own error text
   on rejection — and in both cases the business operation that triggered it still succeeds.
-# SEF-Project
