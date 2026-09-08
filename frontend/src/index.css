@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+/* Dark mode is driven by a `.dark` class on <html>, set by ThemeProvider before paint. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================================
+   SmartDesk AI design system
+
+   One set of semantic tokens shared by the marketing site, the auth pages and
+   the application. Components use `bg-surface`, `text-fg`, `border-line` and so
+   on, never a raw palette colour - so switching theme is a token swap, not a
+   sweep of `dark:` overrides.
+
+   The accent is taken from the SmartDesk logo mark.
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --sd-bg:            #ffffff;   /* page */
+  --sd-bg-subtle:     #f8fafc;   /* alternating sections, table headers */
+  --sd-surface:       #ffffff;   /* cards */
+  --sd-surface-2:     #f1f5f9;   /* inset areas, code blocks, chips */
+  --sd-surface-hover: #f8fafc;
+
+  /* Text */
+  --sd-fg:            #0d1524;   /* headings - deep navy, matches the wordmark */
+  --sd-fg-muted:      #475569;   /* body copy */
+  --sd-fg-subtle:     #5f6d82;   /* captions, metadata - AA on both bg and surface-2 */
+
+  /* Lines */
+  --sd-line:          #e2e8f0;
+  --sd-line-strong:   #cbd5e1;
+
+  /* Accent - the logo orange */
+  --sd-accent:        #f26522;   /* the brand orange: borders, icons, large display text */
+  --sd-accent-solid:  #c94709;   /* accent FILLS - white text on this clears AA at 4.78:1 */
+  --sd-accent-hover:  #a83a06;
+  --sd-accent-fg:     #ffffff;   /* text on an accent fill */
+  --sd-accent-soft:   #fff2ec;   /* tinted background */
+  --sd-accent-text:   #c2410c;   /* accent text on a light background, AA compliant */
+
+  /* Status. Deliberately muted so the accent stays the loudest colour. */
+  --sd-ok:            #047857;
+  --sd-ok-soft:       #ecfdf5;
+  --sd-warn:          #b45309;
+  --sd-warn-soft:     #fffbeb;
+  --sd-danger:        #b91c1c;
+  --sd-danger-soft:   #fef2f2;
+  --sd-info:          #1d4ed8;
+  --sd-info-soft:     #eff6ff;
+
+  /* Atmospheric gradient tints used behind hero and CTA sections */
+  --sd-glow-a:        rgba(99, 102, 241, 0.13);
+  --sd-glow-b:        rgba(242, 101, 34, 0.11);
+
+  --sd-shadow:        0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --sd-shadow-lg:     0 10px 30px -12px rgb(15 23 42 / 0.18);
+}
+
+.dark {
+  --sd-bg:            #0b1020;
+  --sd-bg-subtle:     #0e1526;
+  --sd-surface:       #111827;
+  --sd-surface-2:     #172033;
+  --sd-surface-hover: #172033;
+
+  --sd-fg:            #f8fafc;
+  --sd-fg-muted:      #b3bdcd;
+  --sd-fg-subtle:     #98a2b3;
+
+  --sd-line:          #263244;
+  --sd-line-strong:   #33415a;
+
+  /* Slightly lighter orange: #f26522 does not carry enough contrast on a dark ground. */
+  --sd-accent:        #fb8c3b;
+  /* On the dark theme the light orange is the readable choice for a fill, paired with
+     near-black text (7.96:1). No separate darker value is needed. */
+  --sd-accent-solid:  #fb8c3b;
+  --sd-accent-hover:  #fca35e;
+  --sd-accent-fg:     #1a1005;
+  --sd-accent-soft:   rgba(251, 140, 59, 0.12);
+  --sd-accent-text:   #fdae6d;
+
+  --sd-ok:            #34d399;
+  --sd-ok-soft:       rgba(52, 211, 153, 0.12);
+  --sd-warn:          #fbbf24;
+  --sd-warn-soft:     rgba(251, 191, 36, 0.12);
+  --sd-danger:        #f87171;
+  --sd-danger-soft:   rgba(248, 113, 113, 0.12);
+  --sd-info:          #60a5fa;
+  --sd-info-soft:     rgba(96, 165, 250, 0.12);
+
+  --sd-glow-a:        rgba(99, 102, 241, 0.20);
+  --sd-glow-b:        rgba(251, 140, 59, 0.13);
+
+  --sd-shadow:        0 1px 2px rgb(0 0 0 / 0.30), 0 1px 3px rgb(0 0 0 / 0.24);
+  --sd-shadow-lg:     0 16px 40px -14px rgb(0 0 0 / 0.65);
+}
+
+/* Expose the tokens as Tailwind utilities: bg-surface, text-fg-muted, border-line, ... */
+@theme inline {
+  --color-bg:            var(--sd-bg);
+  --color-bg-subtle:     var(--sd-bg-subtle);
+  --color-surface:       var(--sd-surface);
+  --color-surface-2:     var(--sd-surface-2);
+  --color-surface-hover: var(--sd-surface-hover);
+
+  --color-fg:            var(--sd-fg);
+  --color-fg-muted:      var(--sd-fg-muted);
+  --color-fg-subtle:     var(--sd-fg-subtle);
+
+  --color-line:          var(--sd-line);
+  --color-line-strong:   var(--sd-line-strong);
+
+  --color-accent:        var(--sd-accent);
+  --color-accent-solid:  var(--sd-accent-solid);
+  --color-accent-hover:  var(--sd-accent-hover);
+  --color-accent-fg:     var(--sd-accent-fg);
+  --color-accent-soft:   var(--sd-accent-soft);
+  --color-accent-text:   var(--sd-accent-text);
+
+  --color-ok:            var(--sd-ok);
+  --color-ok-soft:       var(--sd-ok-soft);
+  --color-warn:          var(--sd-warn);
+  --color-warn-soft:     var(--sd-warn-soft);
+  --color-danger:        var(--sd-danger);
+  --color-danger-soft:   var(--sd-danger-soft);
+  --color-info:          var(--sd-info);
+  --color-info-soft:     var(--sd-info-soft);
+
+  --shadow-card:         var(--sd-shadow);
+  --shadow-float:        var(--sd-shadow-lg);
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  background-color: var(--sd-bg);
+  color: var(--sd-fg-muted);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings carry the strong navy; body copy stays muted. */
+h1, h2, h3, h4 { color: var(--sd-fg); text-wrap: balance; }
+
+:focus-visible {
+  outline: 2px solid var(--sd-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection { background: var(--sd-accent); color: var(--sd-accent-fg); }
+
+/* Utility: the soft atmospheric wash behind hero and CTA sections. Pure CSS, no images. */
+.sd-glow {
+  background-image:
+    radial-gradient(60rem 32rem at 15% -10%, var(--sd-glow-a), transparent 60%),
+    radial-gradient(48rem 28rem at 95% 0%, var(--sd-glow-b), transparent 55%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

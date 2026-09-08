@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="SmartDesk.Api/SmartDesk.Api.csproj" />
+  <Project Path="SmartDesk.Application/SmartDesk.Application.csproj" />
+  <Project Path="SmartDesk.Domain/SmartDesk.Domain.csproj" />
+  <Project Path="SmartDesk.Infrastructure/SmartDesk.Infrastructure.csproj" />
+  <Project Path="SmartDesk.Tests/SmartDesk.Tests.csproj" />
+</Solution>

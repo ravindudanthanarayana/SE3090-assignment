@@ -1,0 +1,34 @@
+# --- Secrets. Nothing in here may ever be committed (spec section 18.2, 19).
+.env
+.env.*
+!.env.example
+*.pfx
+appsettings.Production.json
+appsettings.Local.json
+
+# --- .NET
+bin/
+obj/
+*.user
+TestResults/
+coverage/
+*.coverage
+*.trx
+
+# --- Node / React
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+coverage/
+
+# --- Editors
+.vs/
+.vscode/
+.idea/
+*.swp
+
+# --- OS
+.DS_Store
+Thumbs.db
