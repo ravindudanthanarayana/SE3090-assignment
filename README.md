@@ -51,6 +51,8 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 | [Security](#13-security-considerations) | what is protected and how |
 | [Individual contributions](#14-individual-contributions) | who owns what |
 | [AI usage declaration](#15-ai-usage-declaration) | required by spec section 18 |
+| [Operating notes](#16-operating-notes-from-running-against-the-real-services) | what we observed running against live Gemini and Neon |
+| [Known limitations](#17-known-limitations) | stated honestly, for the viva |
 
 Detailed design documents live in [`docs/`](./docs).
 
@@ -362,8 +364,9 @@ BASE_URL=http://localhost:5299 k6 run perf/smoke.js
 | Business rules (unit) | 39 | status machine, SLA calculation, assignment scoring, article relevance, `BusinessRuleEngine` |
 | Ticket service | 18 | creation, authorization scoping, status workflow, comments, search/filter/sort/page |
 | **Agent evaluation** | 30 | the 12 golden cases below |
-| Database integration | 12 | migrations, unique/check/FK constraints, cascades, `jsonb`, `text[]`, transaction atomicity |
-| API + end-to-end | 18 | HTTP status codes, authn/authz, Swagger, and the complete workflow |
+| Database integration | 13 | migrations, unique/check/FK constraints, cascades, `jsonb`, `text[]`, transaction atomicity |
+| API + end-to-end | 17 | HTTP status codes, authn/authz, Swagger, and the complete workflow |
+| Configuration | 12 | `ConnectionStringNormalizer` — Neon URI and Npgsql key-value forms, SSL and pooling options |
 | React | 34 | protected routes, form validation, search/filter/sort/pagination, API interaction, loading/empty/error states |
 | **Flutter** | 92 | form validation, DTO parsing, error mapping (401/403/404/409/5xx/timeout), auth state, the agent checklist, reusable widgets, dark mode, 320dp layout — plus **9 tests against real captured API payloads** |
 
