@@ -1,0 +1,191 @@
+{
+    "id": 13,
+    "ticketId": 33,
+    "ticketNumber": "TKT-000033",
+    "ticketTitle": "VPN is not connecting from home",
+    "objective": "Triage, research and route ticket TKT-000033",
+    "status": "Completed",
+    "currentStep": "Completed",
+    "planJson": "{\"steps\": [{\"agent\": \"TriageAgent\", \"order\": 1, \"purpose\": \"Classify the ticket category, priority, and urgency based on the VPN connectivity issue.\", \"expectedOutput\": \"Category, priority level, and urgency score.\"}, {\"agent\": \"SolutionAgent\", \"order\": 2, \"purpose\": \"Search the knowledge base for VPN error 809 troubleshooting steps.\", \"expectedOutput\": \"Recommended troubleshooting steps for the user.\"}, {\"agent\": \"AssignmentAgent\", \"order\": 3, \"purpose\": \"Identify the best support agent to handle the VPN connectivity issue based on skill and current workload.\", \"expectedOutput\": \"Recommended support agent ID.\"}, {\"agent\": \"ValidationAgent\", \"order\": 4, \"purpose\": \"Assess SLA risk and determine if the ticket requires escalation.\", \"expectedOutput\": \"SLA risk assessment and escalation decision.\"}], \"rationale\": \"The ticket requires initial classification to determine the nature of the VPN issue. Once classified, the SolutionAgent provides technical guidance, the AssignmentAgent ensures the right personnel are involved, and the ValidationAgent performs the final SLA check as required by the workflow rules.\"}",
+    "finalOutcomeJson": "{\"triage\": {\"reason\": \"The user is unable to access internal systems while working remotely, which fully blocks their ability to perform their job duties.\", \"category\": \"Network\", \"keywords\": [\"VPN\", \"error 809\", \"remote access\", \"connection failure\"], \"priority\": \"High\", \"urgencyScore\": 4, \"extractedEntities\": [\"VPN client\"]}, \"summary\": \"1 high-impact action(s) held for human approval.\", \"solution\": {\"summary\": \"The user is experiencing VPN error 809, which typically indicates a connection failure. Following the troubleshooting steps in article 1, including credential verification, client restart, and profile reinstallation, should resolve the issue.\", \"confidence\": 0.9, \"recommendedSteps\": [\"Verify that the user's credentials have not expired.\", \"Instruct the user to restart the VPN client to clear any stale sessions.\", \"Confirm the user has a stable internet connection outside of the VPN.\", \"If the issue persists, have the user remove and reinstall the VPN profile.\"], \"matchedArticleIds\": [1]}, \"assignment\": {\"score\": 26, \"reason\": \"Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.\", \"alternatives\": [{\"reason\": \"Sam Hardware has a lower workload but significantly lower skill level (2/5) compared to Priya Network (5/5), which is critical for a High priority ticket.\", \"userId\": 4}, {\"reason\": \"Riya Software has the lowest skill level (0/5) and is currently breaching 5 tickets, making them unsuitable for a High priority assignment.\", \"userId\": 5}], \"recommendedAgentUserId\": 3}, \"validation\": {\"reason\": \"The ticket is correctly categorized as High priority, the assigned agent has the appropriate skill level, and the SLA is currently on track. The proposed solution has high confidence (0.9) and addresses the specific error reported.\", \"isValid\": true, \"slaRisk\": \"OnTrack\", \"violations\": [], \"requiresEscalation\": false}, \"appliedActions\": [\"1 knowledge article(s) suggested\"], \"pendingApprovalActions\": [\"Assign to user 3: Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.\"]}",
+    "errorMessage": null,
+    "startedAt": "2026-09-09T07:39:24.751273Z",
+    "completedAt": "2026-09-09T07:43:17.793086Z",
+    "totalDurationMs": 19726,
+    "steps": [
+        {
+            "id": 60,
+            "stepOrder": 0,
+            "agentName": "PlannerAgent",
+            "purpose": "Create the delegation plan",
+            "status": "Succeeded",
+            "inputJson": "{\"ticketId\": 33, \"objective\": \"Triage, research and route ticket TKT-000033\"}",
+            "outputJson": "{\"steps\": [{\"agent\": \"TriageAgent\", \"order\": 1, \"purpose\": \"Classify the ticket category, priority, and urgency based on the VPN connectivity issue.\", \"expectedOutput\": \"Category, priority level, and urgency score.\"}, {\"agent\": \"SolutionAgent\", \"order\": 2, \"purpose\": \"Search the knowledge base for VPN error 809 troubleshooting steps.\", \"expectedOutput\": \"Recommended troubleshooting steps for the user.\"}, {\"agent\": \"AssignmentAgent\", \"order\": 3, \"purpose\": \"Identify the best support agent to handle the VPN connectivity issue based on skill and current workload.\", \"expectedOutput\": \"Recommended support agent ID.\"}, {\"agent\": \"ValidationAgent\", \"order\": 4, \"purpose\": \"Assess SLA risk and determine if the ticket requires escalation.\", \"expectedOutput\": \"SLA risk assessment and escalation decision.\"}], \"rationale\": \"The ticket requires initial classification to determine the nature of the VPN issue. Once classified, the SolutionAgent provides technical guidance, the AssignmentAgent ensures the right personnel are involved, and the ValidationAgent performs the final SLA check as required by the workflow rules.\"}",
+            "validationJson": "{\"source\": \"model\", \"schemaValid\": true}",
+            "errorMessage": null,
+            "retryCount": 0,
+            "durationMs": 3946,
+            "startedAt": "2026-09-09T07:39:26.187064Z",
+            "completedAt": "2026-09-09T07:39:30.133233Z",
+            "toolCalls": []
+        },
+        {
+            "id": 61,
+            "stepOrder": 1,
+            "agentName": "TriageAgent",
+            "purpose": "Classify the ticket category, priority, and urgency based on the VPN connectivity issue.",
+            "status": "Succeeded",
+            "inputJson": "{\"ticketId\": 33, \"availableCategories\": [\"Network\", \"Hardware\", \"Software\", \"Account & Access\", \"Email\", \"General\"]}",
+            "outputJson": "{\"reason\": \"The user is unable to access internal systems while working remotely, which fully blocks their ability to perform their job duties.\", \"category\": \"Network\", \"keywords\": [\"VPN\", \"error 809\", \"remote access\", \"connection failure\"], \"priority\": \"High\", \"urgencyScore\": 4, \"extractedEntities\": [\"VPN client\"]}",
+            "validationJson": "{\"attempts\": 1, \"schemaValid\": true}",
+            "errorMessage": null,
+            "retryCount": 0,
+            "durationMs": 3740,
+            "startedAt": "2026-09-09T07:39:31.108968Z",
+            "completedAt": "2026-09-09T07:39:35.513673Z",
+            "toolCalls": [
+                {
+                    "id": 106,
+                    "toolName": "GetTicket",
+                    "inputJson": "{\"ticketId\": 33}",
+                    "outputJson": "{\"title\": \"VPN is not connecting from home\", \"status\": \"New\", \"slaDueAt\": \"2026-09-09T11:39:22.457422Z\", \"ticketId\": 33, \"createdAt\": \"2026-09-09T07:39:22.457422Z\", \"description\": \"My VPN client stopped connecting this morning. It shows error 809 right after I enter my credentials. I cannot reach any internal system and I am working remotely today.\", \"ticketNumber\": \"TKT-000033\", \"currentCategory\": \"Network\", \"currentPriority\": \"High\", \"hoursUntilSlaDue\": 4, \"currentCategoryId\": 1}",
+                    "success": true,
+                    "errorMessage": null,
+                    "durationMs": 288,
+                    "createdAt": "2026-09-09T07:39:32.064694Z"
+                }
+            ]
+        },
+        {
+            "id": 62,
+            "stepOrder": 2,
+            "agentName": "SolutionAgent",
+            "purpose": "Search the knowledge base for VPN error 809 troubleshooting steps.",
+            "status": "Succeeded",
+            "inputJson": "{\"ticketId\": 33, \"searchQuery\": \"VPN error 809 remote access connection failure\", \"triageCategory\": \"Network\", \"retrievedArticleIds\": [1, 4, 2, 10, 5]}",
+            "outputJson": "{\"summary\": \"The user is experiencing VPN error 809, which typically indicates a connection failure. Following the troubleshooting steps in article 1, including credential verification, client restart, and profile reinstallation, should resolve the issue.\", \"confidence\": 0.9, \"recommendedSteps\": [\"Verify that the user's credentials have not expired.\", \"Instruct the user to restart the VPN client to clear any stale sessions.\", \"Confirm the user has a stable internet connection outside of the VPN.\", \"If the issue persists, have the user remove and reinstall the VPN profile.\"], \"matchedArticleIds\": [1]}",
+            "validationJson": "{\"attempts\": 1, \"schemaValid\": true}",
+            "errorMessage": null,
+            "retryCount": 0,
+            "durationMs": 4073,
+            "startedAt": "2026-09-09T07:39:36.061548Z",
+            "completedAt": "2026-09-09T07:39:40.66921Z",
+            "toolCalls": [
+                {
+                    "id": 107,
+                    "toolName": "SearchKnowledgeBase",
+                    "inputJson": "{\"query\": \"VPN error 809 remote access connection failure\", \"categoryId\": 1}",
+                    "outputJson": "{\"query\": \"VPN error 809 remote access connection failure\", \"results\": [{\"title\": \"Resolving VPN connection failures\", \"excerpt\": \"If the VPN client cannot connect, first verify the user's credentials have not expired. Restart the VPN client to clear any stale session. Confirm the device has a working internet connection outside the VPN. If the client reports a certificate error, remove and reinstall the VPN profile. Escalate t...\", \"articleId\": 1, \"matchReason\": \"same category, 3 title keyword match(es), 3 tag match(es), 3 body keyword match(es)\", \"relevanceScore\": 15}, {\"title\": \"Requesting access to a shared drive\", \"excerpt\": \"Access to a shared drive requires written approval from the data owner. Raise a ticket that names the drive, the folder and the level of access required. Once the owner approves in the ticket, the service desk adds the user to the matching security group. Group membership takes effect after the user...\", \"articleId\": 4, \"matchReason\": \"1 title keyword match(es), 1 tag match(es), 1 body keyword match(es)\", \"relevanceScore\": 4}, {\"title\": \"Wi-Fi keeps disconnecting on laptops\", \"excerpt\": \"Frequent Wi-Fi drops are usually a driver or power-management problem. Update the wireless adapter driver to the current approved version. In the adapter's power management settings, disable the option that allows the computer to turn off the device to save power. Forget and rejoin the corporate net...\", \"articleId\": 2, \"matchReason\": \"same category\", \"relevanceScore\": 3}, {\"title\": \"Application crashes on startup\", \"excerpt\": \"Reproduce the crash and capture the exact error message. Clear the application's local cache and start it again. If the crash persists, uninstall and reinstall from the company portal. Collect the crash log from the event viewer before escalating to the application owner, as they will ask for it fir...\", \"articleId\": 10, \"matchReason\": \"1 tag match(es), 1 body keyword match(es)\", \"relevanceScore\": 2}, {\"title\": \"Printer not responding\", \"excerpt\": \"First confirm the printer is powered on and shows no error on its panel. Clear the print queue on the user's device and restart the print spooler service. Reinstall the printer using the corporate print server path rather than a direct IP connection. If several users are affected, check the print se...\", \"articleId\": 5, \"matchReason\": \"2 body keyword match(es)\", \"relevanceScore\": 1}]}",
+                    "success": true,
+                    "errorMessage": null,
+                    "durationMs": 294,
+                    "createdAt": "2026-09-09T07:39:36.893679Z"
+                }
+            ]
+        },
+        {
+            "id": 63,
+            "stepOrder": 3,
+            "agentName": "AssignmentAgent",
+            "purpose": "Identify the best support agent to handle the VPN connectivity issue based on skill and current workload.",
+            "status": "Succeeded",
+            "inputJson": "{\"ticketId\": 33, \"triageCategory\": \"Network\", \"candidateUserIds\": [3, 4, 5]}",
+            "outputJson": "{\"score\": 26, \"reason\": \"Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.\", \"alternatives\": [{\"reason\": \"Sam Hardware has a lower workload but significantly lower skill level (2/5) compared to Priya Network (5/5), which is critical for a High priority ticket.\", \"userId\": 4}, {\"reason\": \"Riya Software has the lowest skill level (0/5) and is currently breaching 5 tickets, making them unsuitable for a High priority assignment.\", \"userId\": 5}], \"recommendedAgentUserId\": 3}",
+            "validationJson": "{\"attempts\": 1, \"schemaValid\": true}",
+            "errorMessage": null,
+            "retryCount": 0,
+            "durationMs": 5441,
+            "startedAt": "2026-09-09T07:39:41.197539Z",
+            "completedAt": "2026-09-09T07:39:47.177608Z",
+            "toolCalls": [
+                {
+                    "id": 108,
+                    "toolName": "GetSupportAgents",
+                    "inputJson": "{}",
+                    "outputJson": "{\"count\": 3, \"agents\": [{\"skills\": [{\"categoryId\": 1, \"categoryName\": \"Network\", \"proficiencyLevel\": 5}, {\"categoryId\": 4, \"categoryName\": \"Account & Access\", \"proficiencyLevel\": 4}, {\"categoryId\": 5, \"categoryName\": \"Email\", \"proficiencyLevel\": 3}], \"userId\": 3, \"fullName\": \"Priya Network\"}, {\"skills\": [{\"categoryId\": 2, \"categoryName\": \"Hardware\", \"proficiencyLevel\": 5}, {\"categoryId\": 1, \"categoryName\": \"Network\", \"proficiencyLevel\": 2}, {\"categoryId\": 6, \"categoryName\": \"General\", \"proficiencyLevel\": 3}], \"userId\": 4, \"fullName\": \"Sam Hardware\"}, {\"skills\": [{\"categoryId\": 3, \"categoryName\": \"Software\", \"proficiencyLevel\": 5}, {\"categoryId\": 5, \"categoryName\": \"Email\", \"proficiencyLevel\": 4}, {\"categoryId\": 4, \"categoryName\": \"Account & Access\", \"proficiencyLevel\": 3}, {\"categoryId\": 6, \"categoryName\": \"General\", \"proficiencyLevel\": 4}], \"userId\": 5, \"fullName\": \"Riya Software\"}]}",
+                    "success": true,
+                    "errorMessage": null,
+                    "durationMs": 280,
+                    "createdAt": "2026-09-09T07:39:42.017247Z"
+                },
+                {
+                    "id": 109,
+                    "toolName": "GetAgentWorkload",
+                    "inputJson": "{}",
+                    "outputJson": "{\"workload\": [{\"userId\": 3, \"fullName\": \"Priya Network\", \"breaching\": 6, \"openTickets\": 8}, {\"userId\": 4, \"fullName\": \"Sam Hardware\", \"breaching\": 4, \"openTickets\": 5}, {\"userId\": 5, \"fullName\": \"Riya Software\", \"breaching\": 5, \"openTickets\": 5}]}",
+                    "success": true,
+                    "errorMessage": null,
+                    "durationMs": 306,
+                    "createdAt": "2026-09-09T07:39:42.596555Z"
+                },
+                {
+                    "id": 110,
+                    "toolName": "ScoreAssignmentCandidates",
+                    "inputJson": "{\"categoryId\": 1}",
+                    "outputJson": "{\"candidates\": [{\"score\": 26, \"userId\": 3, \"fullName\": \"Priya Network\", \"skillLevel\": 5, \"explanation\": \"Skill level 5/5 for this category (+50), 8 open ticket(s) (-24).\", \"openTickets\": 8}, {\"score\": 5, \"userId\": 4, \"fullName\": \"Sam Hardware\", \"skillLevel\": 2, \"explanation\": \"Skill level 2/5 for this category (+20), 5 open ticket(s) (-15).\", \"openTickets\": 5}, {\"score\": -15, \"userId\": 5, \"fullName\": \"Riya Software\", \"skillLevel\": 0, \"explanation\": \"Skill level 0/5 for this category (+0), 5 open ticket(s) (-15).\", \"openTickets\": 5}], \"categoryId\": 1}",
+                    "success": true,
+                    "errorMessage": null,
+                    "durationMs": 861,
+                    "createdAt": "2026-09-09T07:39:43.776421Z"
+                }
+            ]
+        },
+        {
+            "id": 64,
+            "stepOrder": 4,
+            "agentName": "ValidationAgent",
+            "purpose": "Assess SLA risk and determine if the ticket requires escalation.",
+            "status": "Succeeded",
+            "inputJson": "{\"triage\": {\"reason\": \"The user is unable to access internal systems while working remotely, which fully blocks their ability to perform their job duties.\", \"category\": \"Network\", \"keywords\": [\"VPN\", \"error 809\", \"remote access\", \"connection failure\"], \"priority\": \"High\", \"urgencyScore\": 4, \"extractedEntities\": [\"VPN client\"]}, \"slaFacts\": {\"isAtRisk\": false, \"slaDueAt\": \"2026-09-09T11:39:22.457422Z\", \"slaState\": \"OnTrack\", \"ticketId\": 33, \"isBreached\": false, \"currentStatus\": \"New\", \"hoursRemaining\": 3.99, \"currentPriority\": \"High\"}, \"solution\": {\"summary\": \"The user is experiencing VPN error 809, which typically indicates a connection failure. Following the troubleshooting steps in article 1, including credential verification, client restart, and profile reinstallation, should resolve the issue.\", \"confidence\": 0.9, \"recommendedSteps\": [\"Verify that the user's credentials have not expired.\", \"Instruct the user to restart the VPN client to clear any stale sessions.\", \"Confirm the user has a stable internet connection outside of the VPN.\", \"If the issue persists, have the user remove and reinstall the VPN profile.\"], \"matchedArticleIds\": [1]}, \"ticketId\": 33, \"assignment\": {\"score\": 26, \"reason\": \"Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.\", \"alternatives\": [{\"reason\": \"Sam Hardware has a lower workload but significantly lower skill level (2/5) compared to Priya Network (5/5), which is critical for a High priority ticket.\", \"userId\": 4}, {\"reason\": \"Riya Software has the lowest skill level (0/5) and is currently breaching 5 tickets, making them unsuitable for a High priority assignment.\", \"userId\": 5}], \"recommendedAgentUserId\": 3}}",
+            "outputJson": "{\"reason\": \"The ticket is correctly categorized as High priority, the assigned agent has the appropriate skill level, and the SLA is currently on track. The proposed solution has high confidence (0.9) and addresses the specific error reported.\", \"isValid\": true, \"slaRisk\": \"OnTrack\", \"violations\": [], \"requiresEscalation\": false}",
+            "validationJson": "{\"attempts\": 1, \"schemaValid\": true}",
+            "errorMessage": null,
+            "retryCount": 0,
+            "durationMs": 2526,
+            "startedAt": "2026-09-09T07:39:47.711175Z",
+            "completedAt": "2026-09-09T07:39:50.774559Z",
+            "toolCalls": [
+                {
+                    "id": 111,
+                    "toolName": "CheckSla",
+                    "inputJson": "{\"ticketId\": 33}",
+                    "outputJson": "{\"isAtRisk\": false, \"slaDueAt\": \"2026-09-09T11:39:22.457422Z\", \"slaState\": \"OnTrack\", \"ticketId\": 33, \"isBreached\": false, \"currentStatus\": \"New\", \"hoursRemaining\": 3.99, \"currentPriority\": \"High\"}",
+                    "success": true,
+                    "errorMessage": null,
+                    "durationMs": 264,
+                    "createdAt": "2026-09-09T07:39:48.50654Z"
+                }
+            ]
+        }
+    ],
+    "approvals": [
+        {
+            "id": 17,
+            "workflowId": 13,
+            "ticketId": 33,
+            "ticketNumber": "TKT-000033",
+            "ticketTitle": "VPN is not connecting from home",
+            "actionType": "Assign",
+            "proposedActionJson": "{\"ticketId\": 33, \"actionType\": 1, \"description\": \"Assign to user 3: Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.\", \"targetUserId\": 3, \"targetPriority\": null}",
+            "reason": "Assign to user 3: Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.",
+            "riskLevel": "Medium",
+            "status": "Approved",
+            "requestedAt": "2026-09-09T07:39:53.231157Z",
+            "decidedByName": "Morgan Manager",
+            "decidedAt": "2026-09-09T07:43:10.887385Z",
+            "decisionNote": "Agreed - Priya has the network skill for this."
+        }
+    ],
+    "workflowToolCalls": [
+        {
+            "id": 112,
+            "toolName": "RequestHumanApproval",
+            "inputJson": "{\"reason\": \"Assign to user 3: Priya Network is the highest-scoring candidate and possesses the maximum skill level (5/5) required to handle a High priority ticket efficiently, despite having a higher current workload.\", \"actionType\": \"Assign\", \"targetUserId\": 3, \"targetPriority\": null}",
+            "outputJson": "{\"status\": \"Pending\", \"message\": \"Approval requested. No change has been made to the ticket.\", \"actionType\": \"Assign\", \"approvalId\": 17}",
+            "success": true,
+            "errorMessage": null,
+            "durationMs": 821,
+            "createdAt": "2026-09-09T07:39:53.516577Z"
+        }
+    ]
+}

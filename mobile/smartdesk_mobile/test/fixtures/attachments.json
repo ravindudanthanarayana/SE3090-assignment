@@ -1,0 +1,10 @@
+[
+    {
+        "id": 1,
+        "fileName": "shot.png",
+        "contentType": "image/png",
+        "sizeBytes": 70,
+        "downloadUrl": "/api/tickets/33/attachments/1/content",
+        "createdAt": "2026-09-09T07:42:03.837753Z"
+    }
+]

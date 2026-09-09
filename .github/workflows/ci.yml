@@ -1,0 +1,138 @@
+name: CI
+
+# Spec section 13 requires a workflow that restores, builds and runs the backend tests on every
+# push and pull request to main. The frontend job is the encouraged extra pipeline.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    name: Backend build and test
+    runs-on: ubuntu-latest
+
+    # The database integration tests run against a real PostgreSQL, not a mock, so the
+    # constraints and transaction behaviour they assert are the genuine ones.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        working-directory: backend
+        run: dotnet restore
+
+      - name: Build
+        working-directory: backend
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        working-directory: backend
+        env:
+          # No AI_API_KEY and no NOTIFICATION_API_KEY: the backend falls back to the
+          # deterministic ScriptedLlmClient and NullEmailProvider, so CI needs no secrets
+          # and no external service.
+          TEST_DATABASE_CONNECTION_STRING: "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres"
+        run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/TestResults/
+
+  frontend:
+    name: Frontend build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check and build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Test
+        working-directory: frontend
+        run: npm run test:run
+
+  mobile:
+    name: Flutter analyse, test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to the version the app was developed against, so a Flutter release
+      # cannot break the build without someone choosing to upgrade.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile/smartdesk_mobile
+        run: flutter pub get
+
+      # Treated as a failure, not a warning: the project is currently analyzer-clean
+      # and should stay that way.
+      - name: Analyse
+        working-directory: mobile/smartdesk_mobile
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        working-directory: mobile/smartdesk_mobile
+        run: flutter test
+
+      # Proves the app still compiles for a real target, which `flutter test` does not.
+      - name: Build APK
+        working-directory: mobile/smartdesk_mobile
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartdesk-mobile-apk
+          path: mobile/smartdesk_mobile/build/app/outputs/flutter-apk/app-debug.apk

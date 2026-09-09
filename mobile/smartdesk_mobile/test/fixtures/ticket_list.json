@@ -1,0 +1,24 @@
+{
+    "items": [
+        {
+            "id": 33,
+            "ticketNumber": "TKT-000033",
+            "title": "VPN is not connecting from home",
+            "categoryName": "Network",
+            "status": "Assigned",
+            "priority": "High",
+            "createdByName": "Jane Perera",
+            "assignedToName": "Priya Network",
+            "assignedToUserId": 3,
+            "slaDueAt": "2026-09-09T11:39:22.457422Z",
+            "slaState": "OnTrack",
+            "isEscalated": false,
+            "createdAt": "2026-09-09T07:39:22.457422Z",
+            "updatedAt": "2026-09-09T07:43:11.855354Z"
+        }
+    ],
+    "page": 1,
+    "pageSize": 20,
+    "totalCount": 1,
+    "totalPages": 1
+}

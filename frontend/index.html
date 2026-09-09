@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>SmartDesk AI | AI-Powered IT Support Management</title>
+    <meta name="description" content="SmartDesk AI helps IT teams manage support requests, automate intelligent triage and keep humans in control of high-impact decisions with collaborative AI agents." />
+    <meta name="theme-color" content="#f26522" />
+
+    <link rel="icon" type="image/png" href="/logo-mark.png" />
+    <link rel="apple-touch-icon" href="/logo-mark.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SmartDesk AI | AI-Powered IT Support Management" />
+    <meta property="og:description" content="Manage support requests, automate intelligent triage and keep humans in control of high-impact AI decisions." />
+    <meta property="og:image" content="/logo-wordmark.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script>
+      // Applied before first paint so there is no flash of the wrong theme.
+      // Mirrors the logic in ThemeContext: stored choice wins, otherwise follow the OS.
+      (function () {
+        try {
+          var stored = localStorage.getItem('smartdesk.theme');
+          var dark = stored
+            ? stored === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {
+          /* Private mode can throw on localStorage; light is a safe default. */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
