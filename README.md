@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-# SmartDesk AI
-
-An Agentic AI powered IT help desk and support management system.
-
-Employees raise IT support tickets. A five-agent AI workflow classifies each ticket, searches the
-knowledge base, recommends an owner and checks SLA risk — then **pauses and waits for a human
-manager** before doing anything high-impact. Support agents work the queue, managers approve or
-reject the AI's recommendations, and every step is auditable.
-
-Built for **SE3090 – Software Engineering Frameworks, Assignment 1**.
-=======
 <div align="center">
 
 <img src="frontend/public/logo-mark.png" alt="SmartDesk AI" width="88">
@@ -42,7 +30,6 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 <sub>Built for **SE3090 — Software Engineering Frameworks, Assignment 1**</sub>
 
 </div>
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 ---
 
@@ -58,20 +45,14 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 | [Test accounts](#7-test-accounts) | demo credentials |
 | [Testing](#8-testing) | what is tested and how to run it |
 | [API documentation](#9-api-documentation) | Swagger, endpoint list |
-<<<<<<< HEAD
-| [Deployment](#10-deployment) | Neon, API host, Vercel |
-| [Repository structure](#11-repository-structure) | where everything lives |
-| [Security](#12-security-considerations) | what is protected and how |
-| [Individual contributions](#13-individual-contributions) | who owns what |
-| [AI usage declaration](#14-ai-usage-declaration) | required by spec section 18 |
-=======
 | [The Flutter mobile client](#10-the-flutter-mobile-client) | the employee self-service app |
 | [Deployment](#11-deployment) | Neon, API host, Vercel |
 | [Repository structure](#12-repository-structure) | where everything lives |
 | [Security](#13-security-considerations) | what is protected and how |
 | [Individual contributions](#14-individual-contributions) | who owns what |
 | [AI usage declaration](#15-ai-usage-declaration) | required by spec section 18 |
->>>>>>> IT24100533-Danthanarayana-D.M.R
+| [Operating notes](#16-operating-notes-from-running-against-the-real-services) | what we observed running against live Gemini and Neon |
+| [Known limitations](#17-known-limitations) | stated honestly, for the viva |
 
 Detailed design documents live in [`docs/`](./docs).
 
@@ -116,12 +97,9 @@ Each is owned by one student (spec section 3).
 | Web | React 19 + Vite + TypeScript | Required. TypeScript because the API surface is large and the compiler catches DTO drift for free. |
 | Design system | Semantic CSS custom properties + Tailwind 4 `@theme inline` | One token set (`bg-surface`, `text-fg`, `border-line`, `bg-accent-solid`) shared by the marketing site, auth and the workspace. Dark mode is a token swap, not a sweep of `dark:` overrides. |
 | Web state | **Context API** | Identity plus the JWT is the only genuinely global client state. Redux would be ceremony without benefit — see [ADR-001](./docs/ADRs/ADR-001-react-state-management.md). |
-<<<<<<< HEAD
-=======
 | Mobile | **Flutter 3.35 / Dart 3.9** | Required. One codebase for Android and iOS, and the employee half of the workflow is where a phone genuinely beats a browser — you can photograph the error. |
 | Mobile state | **Riverpod** | Compile-time-safe injection and a built-in loading/data/error union, so no screen hand-rolls its states — see [ADR-007](./docs/ADRs/ADR-007-flutter-state-management.md). |
 | Mobile token storage | **`flutter_secure_storage`** | Keychain / EncryptedSharedPreferences, backed by the platform keystore. `SharedPreferences` is a plain file; a native app has a better option and uses it. |
->>>>>>> IT24100533-Danthanarayana-D.M.R
 | Styling | Tailwind CSS 4 | No separate stylesheet to keep in sync; responsive breakpoints inline. |
 | Agentic AI | **Custom C# orchestrator, in-process** | Spec section 2 permits a custom approach and forbids clients calling the AI directly. In-process makes that structurally impossible — see [ADR-002](./docs/ADRs/ADR-002-agentic-ai-orchestration.md). |
 | LLM | **Google Gemini** `gemini-3.1-flash-lite` (free tier), with a deterministic offline fallback | Spec section 14 requires the assignment be completable at no cost. The `ScriptedLlmClient` also makes every agent evaluation test deterministic. |
@@ -137,11 +115,7 @@ Each is owned by one student (spec section 3).
    staff · manager · admin ──HTTPS──►│  ASP.NET Core Web API                │
    · AI approval console             │                                      │
                                      │  Controllers → Services → EF Core    │
-<<<<<<< HEAD
-   Flutter (built separately) ──────►│         ↑                            │──► Gemini (HTTPS)
-=======
    Flutter (Android / iOS) ─────────►│         ↑                            │──► Gemini (HTTPS)
->>>>>>> IT24100533-Danthanarayana-D.M.R
    employee self-service             │  Agent Orchestrator                  │
                                      │    Planner · Triage · Solution ·     │──► Resend (HTTPS)
                                      │    Assignment · Validation           │
@@ -149,12 +123,9 @@ Each is owned by one student (spec section 3).
                                      └───────────────┬──────────────────────┘
                                                      ▼
                                           Neon PostgreSQL (TLS)
-<<<<<<< HEAD
-=======
 
    Both clients call the SAME endpoints. Neither can reach the database or the
    model directly — that boundary is structural, not a convention.
->>>>>>> IT24100533-Danthanarayana-D.M.R
 ```
 
 A **modular monolith**: one codebase, one deployable, one database, one transaction boundary.
@@ -168,11 +139,7 @@ backend/
   SmartDesk.Application/     DTOs, services, business rules, agents, tools, orchestrator.
   SmartDesk.Infrastructure/  DbContext, migrations, seeding, JWT, BCrypt, Gemini, Resend.
   SmartDesk.Api/             controllers, middleware, DI, Swagger, CORS.
-<<<<<<< HEAD
-  SmartDesk.Tests/           117 tests: unit, agent evaluation, database, API, end-to-end.
-=======
   SmartDesk.Tests/           129 tests: unit, agent evaluation, database, API, end-to-end.
->>>>>>> IT24100533-Danthanarayana-D.M.R
 ```
 
 ---
@@ -239,18 +206,12 @@ None is a rename of another.
 
 ### Prerequisites
 
-<<<<<<< HEAD
-- .NET SDK 10
-- Node.js 20+
-- A PostgreSQL database — either a free [Neon](https://neon.tech) project, or Docker locally
-=======
 | For | Need |
 |---|---|
 | Backend | .NET SDK 10 |
 | Web | Node.js 20+ |
 | Mobile *(optional)* | Flutter 3.35+ / Dart 3.9+, and an Android emulator or iOS simulator |
 | Database | A free [Neon](https://neon.tech) project, or Docker locally |
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 ### Step 1 — Database
 
@@ -324,12 +285,6 @@ npm run dev
 
 Open <http://localhost:5173>.
 
-<<<<<<< HEAD
-### Startup order
-
-Database → API (migrates and seeds) → React. The AI subsystem runs inside the API process, so there
-is nothing else to start.
-=======
 ### Step 5 — Run the mobile app *(optional)*
 
 ```bash
@@ -345,7 +300,6 @@ See [section 10](#10-the-flutter-mobile-client) for the right `API_BASE_URL` per
 Database → API (migrates and seeds) → React and/or Flutter. The AI subsystem runs **inside** the API
 process, so there is nothing else to start. The two clients are independent — run either, or both
 side by side to demonstrate the cross-platform approval workflow.
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 ---
 
@@ -375,23 +329,16 @@ Also seeded: `employee2`, `employee3`, `agent2` (hardware), `agent3` (software).
 7. Try approving as **employee1** — the API returns **403**, because the gate is enforced in the
    backend, not in the UI.
 
-<<<<<<< HEAD
-=======
 **For the cross-platform version of the same story**, raise the ticket from the Flutter app in
 step 1 instead of the browser, approve it in React at step 5, then reopen it in Flutter: the
 Overview shows the new assignee, and the History tab shows the change attributed to `System / AI`.
 That single loop is the evidence for spec §4.7 and §10.2 — see [section 10](#10-the-flutter-mobile-client).
 
->>>>>>> IT24100533-Danthanarayana-D.M.R
 ---
 
 ## 8. Testing
 
-<<<<<<< HEAD
-**117 backend tests + 27 frontend tests, all passing.**
-=======
 **255 tests, all passing** — 129 backend, 34 web, 92 mobile.
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 ```bash
 # Backend — needs a PostgreSQL server for the integration tests
@@ -399,41 +346,29 @@ cd backend
 export TEST_DATABASE_CONNECTION_STRING="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres"
 dotnet test
 
-<<<<<<< HEAD
-# Frontend
-cd frontend
-npm run test:run
-=======
 # Web
 cd frontend && npm run test:run
 
 # Mobile
 cd mobile/smartdesk_mobile && flutter analyze --fatal-infos && flutter test
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 # Performance
 BASE_URL=http://localhost:5299 k6 run perf/smoke.js
 ```
 
-<<<<<<< HEAD
-=======
 > The 30 backend integration tests need a reachable PostgreSQL. Without one they fail with an
 > `NpgsqlException` and the other 99 still pass — CI supplies a `postgres:16` service container.
 
->>>>>>> IT24100533-Danthanarayana-D.M.R
 | Layer | Count | What it covers |
 |---|---|---|
 | Business rules (unit) | 39 | status machine, SLA calculation, assignment scoring, article relevance, `BusinessRuleEngine` |
 | Ticket service | 18 | creation, authorization scoping, status workflow, comments, search/filter/sort/page |
 | **Agent evaluation** | 30 | the 12 golden cases below |
-| Database integration | 12 | migrations, unique/check/FK constraints, cascades, `jsonb`, `text[]`, transaction atomicity |
-| API + end-to-end | 18 | HTTP status codes, authn/authz, Swagger, and the complete workflow |
-<<<<<<< HEAD
-| React | 27 | protected routes, form validation, search/filter/sort/pagination, API interaction, loading/empty/error states |
-=======
+| Database integration | 13 | migrations, unique/check/FK constraints, cascades, `jsonb`, `text[]`, transaction atomicity |
+| API + end-to-end | 17 | HTTP status codes, authn/authz, Swagger, and the complete workflow |
+| Configuration | 12 | `ConnectionStringNormalizer` — Neon URI and Npgsql key-value forms, SSL and pooling options |
 | React | 34 | protected routes, form validation, search/filter/sort/pagination, API interaction, loading/empty/error states |
 | **Flutter** | 92 | form validation, DTO parsing, error mapping (401/403/404/409/5xx/timeout), auth state, the agent checklist, reusable widgets, dark mode, 320dp layout — plus **9 tests against real captured API payloads** |
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 ### The 12 agent evaluation golden cases
 
@@ -455,12 +390,6 @@ spec section 12 explicitly warns against relying on.
 
 ### Continuous integration
 
-<<<<<<< HEAD
-`.github/workflows/ci.yml` runs on every push and pull request to `main` and `develop`:
-restore → build → test the backend against a real PostgreSQL service container, and
-build + test the frontend. **No secrets required** — the scripted LLM and null email provider are
-the automatic fallbacks.
-=======
 `.github/workflows/ci.yml` runs on every push and pull request to `main` and `develop`, as three
 parallel jobs:
 
@@ -472,7 +401,6 @@ parallel jobs:
 
 **No secrets required** — the scripted LLM and null email provider are the automatic fallbacks. The
 APK artifact is what spec §14.4 asks for, produced by CI rather than by hand.
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 ---
 
@@ -495,9 +423,6 @@ Errors are RFC 7807 `ProblemDetails`, so one error handler covers the whole API 
 
 ---
 
-<<<<<<< HEAD
-## 10. Deployment
-=======
 ## 10. The Flutter mobile client
 
 <img src="mobile/smartdesk_mobile/assets/brand/logo-mark.png" align="right" width="52" alt="">
@@ -595,7 +520,6 @@ glance during a demo.
 ---
 
 ## 11. Deployment
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 See [`docs/11-deployment.md`](./docs/11-deployment.md) for the full runbook.
 
@@ -608,24 +532,6 @@ See [`docs/11-deployment.md`](./docs/11-deployment.md) for the full runbook.
 
 ---
 
-<<<<<<< HEAD
-## 11. Repository structure
-
-```
-SmartDeskAI/
-├── backend/              ASP.NET Core solution (5 projects)
-├── frontend/             React + Vite + TypeScript
-├── docs/                 design documents and ADRs
-├── perf/                 k6 performance smoke test
-├── .github/workflows/    CI
-├── .env.example          backend environment variables (no secrets)
-└── README.md
-```
-
----
-
-## 12. Security considerations
-=======
 ## 12. Repository structure
 
 ```
@@ -662,7 +568,6 @@ Domain / Application / Infrastructure / Api.
 ---
 
 ## 13. Security considerations
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 | Concern | Control |
 |---|---|
@@ -676,23 +581,15 @@ Domain / Application / Infrastructure / Api.
 | AI boundary | Agents cannot execute SQL, call arbitrary URLs, or write to any table except a *pending* approval request. |
 | Error leakage | Stack traces are never returned outside Development. |
 | Transport | TLS to Neon (`SSL Mode=Require`), HTTPS in production. |
-<<<<<<< HEAD
-| CORS | Explicit allow-list of origins, not a wildcard. |
-=======
 | CORS | Explicit allow-list of origins, not a wildcard. The native mobile client is not subject to CORS at all. |
 | Mobile token storage | iOS Keychain / Android EncryptedSharedPreferences via `flutter_secure_storage`, not `SharedPreferences`. The password is never written to the device. |
 | Mobile authorization | The app hides what an employee cannot do, but it is **not** the boundary. Verified from a real employee token: another user's ticket → 403 · deciding an approval → 403 · the approval queue → 403 · no or forged token → 401 · attachment bytes without a token → 401. |
 | Client secrets | Neither client holds one. The mobile app is compiled with a base URL only; the database password, JWT signing key and AI key never leave the API process. |
->>>>>>> IT24100533-Danthanarayana-D.M.R
 | Data minimisation | Outbound email contains ticket number, title and status only — never the description. |
 
 ---
 
-<<<<<<< HEAD
-## 13. Individual contributions
-=======
 ## 14. Individual contributions
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 | Student | Component | Agent | Branches |
 |---|---|---|---|
@@ -712,11 +609,7 @@ screens. Strategy: [`docs/09-git-ci-and-flutter-gap.md`](./docs/09-git-ci-and-fl
 
 ---
 
-<<<<<<< HEAD
-## 14. AI usage declaration
-=======
 ## 15. AI usage declaration
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 This assignment is assessed at **AI Use Level 4 (Full AI)** — AI tools are permitted during
 development *with disclosure*, and prohibited during the final demonstration and viva.
@@ -730,11 +623,7 @@ history will not receive credit (spec section 18.3).
 
 ---
 
-<<<<<<< HEAD
-## 15. Operating notes from running against the real services
-=======
 ## 16. Operating notes from running against the real services
->>>>>>> IT24100533-Danthanarayana-D.M.R
 
 Recorded because these are exactly the questions a viva asks, and each was observed rather than assumed.
 
@@ -772,14 +661,6 @@ the performance report.
 
 ---
 
-<<<<<<< HEAD
-## 16. Known limitations
-
-Stated honestly, because the viva will ask.
-
-- **Flutter is not in this repository.** It is being built separately. The API needs no changes to
-  support it — see [`docs/09-git-ci-and-flutter-gap.md`](./docs/09-git-ci-and-flutter-gap.md) for the exact gap.
-=======
 ## 17. Known limitations
 
 Stated honestly, because the viva will ask.
@@ -794,7 +675,6 @@ Stated honestly, because the viva will ask.
 - **`mobile/smartdesk_mobile/android/` deviates from the Flutter template** — Gradle 9.1 + AGP 8.13
   so the build runs on the Java 25 that current Android Studio bundles, and the unused `ndkVersion`
   pin removed.
->>>>>>> IT24100533-Danthanarayana-D.M.R
 - **Knowledge search is `ILIKE` plus keyword scoring**, not full-text search. Adequate at seed scale;
   the upgrade path (`pg_trgm` + GIN index) is documented in `docs/04-database-design.md`.
 - **The frontend bundle is ~816 KB** (237 KB gzipped), dominated by Recharts. Acceptable for an internal
@@ -811,7 +691,3 @@ Stated honestly, because the viva will ask.
   Use `NOTIFICATION_REDIRECT_TO` for demonstrations. The integration itself is real: a genuine HTTPS
   call, a real message id on success, and a recorded `Failed` row with the provider's own error text
   on rejection — and in both cases the business operation that triggered it still succeeds.
-<<<<<<< HEAD
-# SEF-Project
-=======
->>>>>>> IT24100533-Danthanarayana-D.M.R
