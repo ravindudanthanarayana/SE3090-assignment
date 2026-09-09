@@ -65,6 +65,9 @@ export const ticketsApi = {
   history: (id: number) =>
     api.get<TicketHistoryEntry[]>(`/api/tickets/${id}/history`).then((r) => r.data),
 
+  attachments: (id: number) =>
+    api.get(`/api/tickets/${id}/attachments`).then((r) => r.data),
+
   assign: (id: number, body: { assignedToUserId: number; reason?: string }) =>
     api.post(`/api/tickets/${id}/assign`, body).then((r) => r.data),
 

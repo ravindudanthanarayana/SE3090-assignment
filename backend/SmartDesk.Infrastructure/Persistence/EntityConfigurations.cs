@@ -199,3 +199,21 @@ public sealed class TicketArticleLinkConfig : IEntityTypeConfiguration<TicketArt
             .HasForeignKey(l => l.ArticleId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public sealed class TicketAttachmentConfig : IEntityTypeConfiguration<TicketAttachment>
+{
+    public void Configure(EntityTypeBuilder<TicketAttachment> b)
+    {
+        b.ToTable("TicketAttachments");
+        b.HasKey(a => a.Id);
+        b.Property(a => a.FileName).HasMaxLength(255).IsRequired();
+        b.Property(a => a.ContentType).HasMaxLength(100).IsRequired();
+        b.Property(a => a.Content).IsRequired();
+        b.HasIndex(a => a.TicketId);
+
+        b.HasOne(a => a.Ticket).WithMany(t => t.Attachments)
+            .HasForeignKey(a => a.TicketId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(a => a.UploadedByUser).WithMany()
+            .HasForeignKey(a => a.UploadedByUserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}

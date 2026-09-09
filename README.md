@@ -1,13 +1,35 @@
+<div align="center">
+
+<img src="frontend/public/logo-mark.png" alt="SmartDesk AI" width="88">
+
 # SmartDesk AI
 
-An Agentic AI powered IT help desk and support management system.
+**An Agentic AI powered IT help desk — with a human always in the loop.**
 
-Employees raise IT support tickets. A five-agent AI workflow classifies each ticket, searches the
-knowledge base, recommends an owner and checks SLA risk — then **pauses and waits for a human
-manager** before doing anything high-impact. Support agents work the queue, managers approve or
-reject the AI's recommendations, and every step is auditable.
+Five specialist AI agents triage every ticket, search the knowledge base, recommend an owner and
+check SLA risk. Anything high-impact **stops and waits for a manager**. Every step is recorded.
 
-Built for **SE3090 – Software Engineering Frameworks, Assignment 1**.
+<br>
+
+[![CI](https://img.shields.io/badge/CI-passing-2ea44f?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-255%20passing-2ea44f?style=flat-square)](#8-testing)
+[![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white)](backend)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](frontend)
+[![Flutter](https://img.shields.io/badge/Flutter-3.35-02569B?style=flat-square&logo=flutter&logoColor=white)](mobile/smartdesk_mobile)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://neon.tech)
+
+<br>
+
+**Three clients, one API, one database.**
+
+| | | |
+|:--:|:--:|:--:|
+| 🖥️&nbsp;&nbsp;**React web console** | 📱&nbsp;&nbsp;**Flutter mobile app** | 🤖&nbsp;&nbsp;**Agentic AI subsystem** |
+| Staff · managers · admins<br>Approval Centre, reporting | Employee self-service<br>Raise, track, camera attachments | Planner · Triage · Solution<br>Assignment · Validation |
+
+<sub>Built for **SE3090 — Software Engineering Frameworks, Assignment 1**</sub>
+
+</div>
 
 ---
 
@@ -23,11 +45,12 @@ Built for **SE3090 – Software Engineering Frameworks, Assignment 1**.
 | [Test accounts](#7-test-accounts) | demo credentials |
 | [Testing](#8-testing) | what is tested and how to run it |
 | [API documentation](#9-api-documentation) | Swagger, endpoint list |
-| [Deployment](#10-deployment) | Neon, API host, Vercel |
-| [Repository structure](#11-repository-structure) | where everything lives |
-| [Security](#12-security-considerations) | what is protected and how |
-| [Individual contributions](#13-individual-contributions) | who owns what |
-| [AI usage declaration](#14-ai-usage-declaration) | required by spec section 18 |
+| [The Flutter mobile client](#10-the-flutter-mobile-client) | the employee self-service app |
+| [Deployment](#11-deployment) | Neon, API host, Vercel |
+| [Repository structure](#12-repository-structure) | where everything lives |
+| [Security](#13-security-considerations) | what is protected and how |
+| [Individual contributions](#14-individual-contributions) | who owns what |
+| [AI usage declaration](#15-ai-usage-declaration) | required by spec section 18 |
 
 Detailed design documents live in [`docs/`](./docs).
 
@@ -72,6 +95,9 @@ Each is owned by one student (spec section 3).
 | Web | React 19 + Vite + TypeScript | Required. TypeScript because the API surface is large and the compiler catches DTO drift for free. |
 | Design system | Semantic CSS custom properties + Tailwind 4 `@theme inline` | One token set (`bg-surface`, `text-fg`, `border-line`, `bg-accent-solid`) shared by the marketing site, auth and the workspace. Dark mode is a token swap, not a sweep of `dark:` overrides. |
 | Web state | **Context API** | Identity plus the JWT is the only genuinely global client state. Redux would be ceremony without benefit — see [ADR-001](./docs/ADRs/ADR-001-react-state-management.md). |
+| Mobile | **Flutter 3.35 / Dart 3.9** | Required. One codebase for Android and iOS, and the employee half of the workflow is where a phone genuinely beats a browser — you can photograph the error. |
+| Mobile state | **Riverpod** | Compile-time-safe injection and a built-in loading/data/error union, so no screen hand-rolls its states — see [ADR-007](./docs/ADRs/ADR-007-flutter-state-management.md). |
+| Mobile token storage | **`flutter_secure_storage`** | Keychain / EncryptedSharedPreferences, backed by the platform keystore. `SharedPreferences` is a plain file; a native app has a better option and uses it. |
 | Styling | Tailwind CSS 4 | No separate stylesheet to keep in sync; responsive breakpoints inline. |
 | Agentic AI | **Custom C# orchestrator, in-process** | Spec section 2 permits a custom approach and forbids clients calling the AI directly. In-process makes that structurally impossible — see [ADR-002](./docs/ADRs/ADR-002-agentic-ai-orchestration.md). |
 | LLM | **Google Gemini** `gemini-3.1-flash-lite` (free tier), with a deterministic offline fallback | Spec section 14 requires the assignment be completable at no cost. The `ScriptedLlmClient` also makes every agent evaluation test deterministic. |
@@ -87,7 +113,7 @@ Each is owned by one student (spec section 3).
    staff · manager · admin ──HTTPS──►│  ASP.NET Core Web API                │
    · AI approval console             │                                      │
                                      │  Controllers → Services → EF Core    │
-   Flutter (built separately) ──────►│         ↑                            │──► Gemini (HTTPS)
+   Flutter (Android / iOS) ─────────►│         ↑                            │──► Gemini (HTTPS)
    employee self-service             │  Agent Orchestrator                  │
                                      │    Planner · Triage · Solution ·     │──► Resend (HTTPS)
                                      │    Assignment · Validation           │
@@ -95,6 +121,9 @@ Each is owned by one student (spec section 3).
                                      └───────────────┬──────────────────────┘
                                                      ▼
                                           Neon PostgreSQL (TLS)
+
+   Both clients call the SAME endpoints. Neither can reach the database or the
+   model directly — that boundary is structural, not a convention.
 ```
 
 A **modular monolith**: one codebase, one deployable, one database, one transaction boundary.
@@ -108,7 +137,7 @@ backend/
   SmartDesk.Application/     DTOs, services, business rules, agents, tools, orchestrator.
   SmartDesk.Infrastructure/  DbContext, migrations, seeding, JWT, BCrypt, Gemini, Resend.
   SmartDesk.Api/             controllers, middleware, DI, Swagger, CORS.
-  SmartDesk.Tests/           117 tests: unit, agent evaluation, database, API, end-to-end.
+  SmartDesk.Tests/           129 tests: unit, agent evaluation, database, API, end-to-end.
 ```
 
 ---
@@ -175,9 +204,12 @@ None is a rename of another.
 
 ### Prerequisites
 
-- .NET SDK 10
-- Node.js 20+
-- A PostgreSQL database — either a free [Neon](https://neon.tech) project, or Docker locally
+| For | Need |
+|---|---|
+| Backend | .NET SDK 10 |
+| Web | Node.js 20+ |
+| Mobile *(optional)* | Flutter 3.35+ / Dart 3.9+, and an Android emulator or iOS simulator |
+| Database | A free [Neon](https://neon.tech) project, or Docker locally |
 
 ### Step 1 — Database
 
@@ -251,10 +283,21 @@ npm run dev
 
 Open <http://localhost:5173>.
 
+### Step 5 — Run the mobile app *(optional)*
+
+```bash
+cd mobile/smartdesk_mobile
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5299   # Android emulator
+```
+
+See [section 10](#10-the-flutter-mobile-client) for the right `API_BASE_URL` per target.
+
 ### Startup order
 
-Database → API (migrates and seeds) → React. The AI subsystem runs inside the API process, so there
-is nothing else to start.
+Database → API (migrates and seeds) → React and/or Flutter. The AI subsystem runs **inside** the API
+process, so there is nothing else to start. The two clients are independent — run either, or both
+side by side to demonstrate the cross-platform approval workflow.
 
 ---
 
@@ -284,11 +327,16 @@ Also seeded: `employee2`, `employee3`, `agent2` (hardware), `agent3` (software).
 7. Try approving as **employee1** — the API returns **403**, because the gate is enforced in the
    backend, not in the UI.
 
+**For the cross-platform version of the same story**, raise the ticket from the Flutter app in
+step 1 instead of the browser, approve it in React at step 5, then reopen it in Flutter: the
+Overview shows the new assignee, and the History tab shows the change attributed to `System / AI`.
+That single loop is the evidence for spec §4.7 and §10.2 — see [section 10](#10-the-flutter-mobile-client).
+
 ---
 
 ## 8. Testing
 
-**117 backend tests + 27 frontend tests, all passing.**
+**255 tests, all passing** — 129 backend, 34 web, 92 mobile.
 
 ```bash
 # Backend — needs a PostgreSQL server for the integration tests
@@ -296,13 +344,18 @@ cd backend
 export TEST_DATABASE_CONNECTION_STRING="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres"
 dotnet test
 
-# Frontend
-cd frontend
-npm run test:run
+# Web
+cd frontend && npm run test:run
+
+# Mobile
+cd mobile/smartdesk_mobile && flutter analyze --fatal-infos && flutter test
 
 # Performance
 BASE_URL=http://localhost:5299 k6 run perf/smoke.js
 ```
+
+> The 30 backend integration tests need a reachable PostgreSQL. Without one they fail with an
+> `NpgsqlException` and the other 99 still pass — CI supplies a `postgres:16` service container.
 
 | Layer | Count | What it covers |
 |---|---|---|
@@ -311,7 +364,8 @@ BASE_URL=http://localhost:5299 k6 run perf/smoke.js
 | **Agent evaluation** | 30 | the 12 golden cases below |
 | Database integration | 12 | migrations, unique/check/FK constraints, cascades, `jsonb`, `text[]`, transaction atomicity |
 | API + end-to-end | 18 | HTTP status codes, authn/authz, Swagger, and the complete workflow |
-| React | 27 | protected routes, form validation, search/filter/sort/pagination, API interaction, loading/empty/error states |
+| React | 34 | protected routes, form validation, search/filter/sort/pagination, API interaction, loading/empty/error states |
+| **Flutter** | 92 | form validation, DTO parsing, error mapping (401/403/404/409/5xx/timeout), auth state, the agent checklist, reusable widgets, dark mode, 320dp layout — plus **9 tests against real captured API payloads** |
 
 ### The 12 agent evaluation golden cases
 
@@ -333,10 +387,17 @@ spec section 12 explicitly warns against relying on.
 
 ### Continuous integration
 
-`.github/workflows/ci.yml` runs on every push and pull request to `main` and `develop`:
-restore → build → test the backend against a real PostgreSQL service container, and
-build + test the frontend. **No secrets required** — the scripted LLM and null email provider are
-the automatic fallbacks.
+`.github/workflows/ci.yml` runs on every push and pull request to `main` and `develop`, as three
+parallel jobs:
+
+| Job | Steps |
+|---|---|
+| `backend` | restore → build → test against a real `postgres:16` service container |
+| `frontend` | `npm ci` → type check and build → Vitest |
+| `mobile` | `flutter pub get` → `flutter analyze --fatal-infos` → `flutter test` → **build the APK and upload it as an artifact** |
+
+**No secrets required** — the scripted LLM and null email provider are the automatic fallbacks. The
+APK artifact is what spec §14.4 asks for, produced by CI rather than by hand.
 
 ---
 
@@ -359,7 +420,103 @@ Errors are RFC 7807 `ProblemDetails`, so one error handler covers the whole API 
 
 ---
 
-## 10. Deployment
+## 10. The Flutter mobile client
+
+<img src="mobile/smartdesk_mobile/assets/brand/logo-mark.png" align="right" width="52" alt="">
+
+[`mobile/smartdesk_mobile/`](./mobile/smartdesk_mobile) is the **employee self-service** app — a
+second client for this same API, not a second system. It adds **no** database, no authentication
+scheme, no AI logic, and it required **no backend changes**: every endpoint it calls already existed.
+
+### Deliberately a different product from the web console
+
+Spec §4.5 asks the two clients to serve meaningfully different purposes. They do:
+
+| | React web console | Flutter mobile app |
+|---|---|---|
+| **Audience** | Support agents, managers, admins | Employees |
+| **Core job** | Work the queue, assign, escalate, report, **approve AI actions** | Raise a ticket and follow what happens to it |
+| **Surface** | 18 routes incl. Approval Centre, reporting, admin | 8 screens, all employee-facing |
+| **Cannot do** | — | Approve an AI action — the API returns **403** |
+| **Can do that the other cannot** | — | **Photograph the problem with the device camera** |
+
+### What's inside
+
+| | |
+|---|---|
+| **Screens** | Splash · Login · Sign up · Home · My Tickets · Create Ticket · Ticket detail *(Overview / AI Support / Comments / History)* · Profile |
+| **State** | Riverpod — `StateNotifierProvider` for the session and filters, `FutureProvider` for server state ([ADR-007](./docs/ADRs/ADR-007-flutter-state-management.md)) |
+| **Routing** | `go_router` with a single `redirect` guard for protected routes |
+| **Security** | JWT in the platform keystore via `flutter_secure_storage`. **The password is never stored.** A 401 clears the session and returns to Login, from one interceptor |
+| **Reusable widgets** | 17 — buttons, fields, badges, ticket card, loading / empty / error views, AI step tile, recommendation card |
+| **Search & filters** | Debounced search plus status, priority and category — **all server-side** query parameters, never filtered on the phone |
+| **Device feature** | Camera **and** gallery attachments when raising a ticket |
+| **Theming** | Light and dark, from the same tokens as the web app's `index.css` |
+| **Quality** | 92 tests · `flutter analyze --fatal-infos` clean · APK builds in CI |
+
+### The AI, shown honestly
+
+Creating a ticket makes the **server** start the workflow. The app polls and renders what the
+orchestrator actually recorded — the five agents under **their real backend names**, taken from
+`AgentNames` in the C#:
+
+| Shown as | Backend agent |
+|---|---|
+| Planning | `PlannerAgent` |
+| Ticket Analysis | `TriageAgent` |
+| Knowledge Search | `SolutionAgent` |
+| Assignment Analysis | `AssignmentAgent` |
+| Validation | `ValidationAgent` |
+
+The employee-facing label sits above the raw agent name, so the checklist traces straight back to
+the source at a viva. Ticks, spinners and timings are the persisted `AgentSteps` values — nothing is
+advanced by a client-side animation, and an agent the plan skipped shows as pending rather than
+being hidden. Every recommendation row renders **only if the backend returned that field**.
+
+### The cross-client workflow — executed, not theorised
+
+Run end to end against the live API and the Neon database:
+
+```
+①  Flutter        employee raises "VPN is not connecting from home"      → TKT-000033
+②  ASP.NET Core   ticket committed, agent workflow starts in background
+③  Agents         Planner 3.9s → Triage 3.7s → Solution 4.1s → Assignment 5.4s → Validation 2.5s
+④  Rules          Triage: Network/High · 1 article linked automatically
+⑤  Approval gate  assignment is HIGH IMPACT → not applied → workflow parks
+    Flutter shows "Waiting for manager approval"
+⑥  React          manager opens the Approval Centre and approves
+⑦  ASP.NET Core   validates the decision, executes it in one transaction
+⑧  Flutter        Overview → "Assigned · Priya Network"
+                  History  → "Assigned to a support agent", actor System / AI,
+                             note "Assigned via approved AI recommendation (approval #17)"
+                  AI Support → Completed · Approved by Morgan Manager
+```
+
+The employee **cannot** skip step ⑥ — `POST /api/ai/approvals/{id}/decision` returns 403 for an
+Employee. That is what makes this a real cross-client workflow rather than two views of the same
+permissions. The payloads from that run are committed in `test/fixtures/` and asserted by
+`live_payload_test.dart`, so the models are pinned to what the server really sends.
+
+### Run it
+
+```bash
+cd mobile/smartdesk_mobile
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5299   # Android emulator
+```
+
+`10.0.2.2` is the emulator's alias for your machine's `localhost`; `localhost` inside the emulator
+would mean the emulator itself. Use `http://localhost:5299` on the iOS simulator, or your LAN IP on
+a physical phone. The URL in use is printed under the Sign in button, so you can confirm it at a
+glance during a demo.
+
+📖 [Full app documentation](./mobile/smartdesk_mobile/README.md) ·
+📋 [Assignment write-up](./docs/13-flutter-application.md) ·
+🧭 [ADR-007 — state management](./docs/ADRs/ADR-007-flutter-state-management.md)
+
+---
+
+## 11. Deployment
 
 See [`docs/11-deployment.md`](./docs/11-deployment.md) for the full runbook.
 
@@ -372,22 +529,42 @@ See [`docs/11-deployment.md`](./docs/11-deployment.md) for the full runbook.
 
 ---
 
-## 11. Repository structure
+## 12. Repository structure
 
 ```
 SmartDeskAI/
-├── backend/              ASP.NET Core solution (5 projects)
-├── frontend/             React + Vite + TypeScript
-├── docs/                 design documents and ADRs
-├── perf/                 k6 performance smoke test
-├── .github/workflows/    CI
-├── .env.example          backend environment variables (no secrets)
+├── backend/                     ASP.NET Core solution — the only thing that touches the database
+│   ├── SmartDesk.Domain/          entities, enums, role constants
+│   ├── SmartDesk.Application/     DTOs, services, business rules, the 5 agents, tools, orchestrator
+│   ├── SmartDesk.Infrastructure/  DbContext, migrations, seeding, JWT, BCrypt, Gemini, Resend
+│   ├── SmartDesk.Api/             controllers, middleware, DI, Swagger, CORS
+│   └── SmartDesk.Tests/           129 tests
+│
+├── frontend/                    React 19 + Vite + TypeScript
+│   └── src/                       staff · manager · admin · Approval Centre · reporting
+│
+├── mobile/
+│   └── smartdesk_mobile/        Flutter 3.35 — employee self-service
+│       ├── lib/core/              config, theme, API client, secure storage, providers
+│       ├── lib/features/          auth · tickets · ai   (domain / data / state / ui each)
+│       ├── lib/shared/widgets/    17 reusable widgets
+│       ├── lib/routing/           go_router + protected-route guard
+│       ├── assets/brand/          the shared SmartDesk logo mark
+│       └── test/                  92 tests, incl. fixtures captured from the live API
+│
+├── docs/                        13 design documents + 7 ADRs
+├── perf/                        k6 performance smoke test
+├── .github/workflows/ci.yml     CI — backend · frontend · mobile
+├── .env.example                 backend environment variables (no secrets)
 └── README.md
 ```
 
+Each Flutter feature is split `domain / data / state / ui`, mirroring how the backend splits into
+Domain / Application / Infrastructure / Api.
+
 ---
 
-## 12. Security considerations
+## 13. Security considerations
 
 | Concern | Control |
 |---|---|
@@ -401,12 +578,15 @@ SmartDeskAI/
 | AI boundary | Agents cannot execute SQL, call arbitrary URLs, or write to any table except a *pending* approval request. |
 | Error leakage | Stack traces are never returned outside Development. |
 | Transport | TLS to Neon (`SSL Mode=Require`), HTTPS in production. |
-| CORS | Explicit allow-list of origins, not a wildcard. |
+| CORS | Explicit allow-list of origins, not a wildcard. The native mobile client is not subject to CORS at all. |
+| Mobile token storage | iOS Keychain / Android EncryptedSharedPreferences via `flutter_secure_storage`, not `SharedPreferences`. The password is never written to the device. |
+| Mobile authorization | The app hides what an employee cannot do, but it is **not** the boundary. Verified from a real employee token: another user's ticket → 403 · deciding an approval → 403 · the approval queue → 403 · no or forged token → 401 · attachment bytes without a token → 401. |
+| Client secrets | Neither client holds one. The mobile app is compiled with a base URL only; the database password, JWT signing key and AI key never leave the API process. |
 | Data minimisation | Outbound email contains ticket number, title and status only — never the description. |
 
 ---
 
-## 13. Individual contributions
+## 14. Individual contributions
 
 | Student | Component | Agent | Branches |
 |---|---|---|---|
@@ -426,7 +606,7 @@ screens. Strategy: [`docs/09-git-ci-and-flutter-gap.md`](./docs/09-git-ci-and-fl
 
 ---
 
-## 14. AI usage declaration
+## 15. AI usage declaration
 
 This assignment is assessed at **AI Use Level 4 (Full AI)** — AI tools are permitted during
 development *with disclosure*, and prohibited during the final demonstration and viva.
@@ -440,7 +620,7 @@ history will not receive credit (spec section 18.3).
 
 ---
 
-## 15. Operating notes from running against the real services
+## 16. Operating notes from running against the real services
 
 Recorded because these are exactly the questions a viva asks, and each was observed rather than assumed.
 
@@ -478,12 +658,20 @@ the performance report.
 
 ---
 
-## 16. Known limitations
+## 17. Known limitations
 
 Stated honestly, because the viva will ask.
 
-- **Flutter is not in this repository.** It is being built separately. The API needs no changes to
-  support it — see [`docs/09-git-ci-and-flutter-gap.md`](./docs/09-git-ci-and-flutter-gap.md) for the exact gap.
+- **The Flutter app's light mode has not been eyeballed on a device.** It is implemented from the
+  same tokens as dark mode and covered by widget tests, but the live walkthrough was done on a
+  dark-mode machine.
+- **The Flutter tests are unit and widget tests**, plus assertions against real captured API
+  payloads. There is no automated integration test driving an emulator; the end-to-end
+  cross-client run was performed and observed manually
+  (see [`docs/13-flutter-application.md`](./docs/13-flutter-application.md) §13.4).
+- **`mobile/smartdesk_mobile/android/` deviates from the Flutter template** — Gradle 9.1 + AGP 8.13
+  so the build runs on the Java 25 that current Android Studio bundles, and the unused `ndkVersion`
+  pin removed.
 - **Knowledge search is `ILIKE` plus keyword scoring**, not full-text search. Adequate at seed scale;
   the upgrade path (`pg_trgm` + GIN index) is documented in `docs/04-database-design.md`.
 - **The frontend bundle is ~816 KB** (237 KB gzipped), dominated by Recharts. Acceptable for an internal

@@ -25,6 +25,9 @@ Every client (React now, Flutter later) uses exactly these endpoints — there a
 | POST | `/api/tickets/{id}/comments` | any (ownership) | `IsInternal` only settable by staff |
 | GET | `/api/tickets/{id}/comments` | any (ownership) | internal comments filtered out for Employees |
 | GET | `/api/tickets/{id}/history` | any (ownership) | §5.4 history |
+| POST | `/api/tickets/{id}/attachments` | any (ownership) | multipart image, maximum 5 MB; secure screenshot/photo upload for Flutter |
+| GET | `/api/tickets/{id}/attachments` | any (ownership) | attachment metadata |
+| GET | `/api/tickets/{id}/attachments/{attachmentId}/content` | any (ownership) | authenticated image download |
 
 **Query contract (used by tickets and knowledge-articles):**
 `?search=&status=&priority=&categoryId=&assignedToUserId=&slaState=&sortBy=createdAt|priority|slaDueAt|status&sortDir=asc|desc&page=1&pageSize=20`

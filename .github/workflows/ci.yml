@@ -94,3 +94,45 @@ jobs:
       - name: Test
         working-directory: frontend
         run: npm run test:run
+
+  mobile:
+    name: Flutter analyse, test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to the version the app was developed against, so a Flutter release
+      # cannot break the build without someone choosing to upgrade.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile/smartdesk_mobile
+        run: flutter pub get
+
+      # Treated as a failure, not a warning: the project is currently analyzer-clean
+      # and should stay that way.
+      - name: Analyse
+        working-directory: mobile/smartdesk_mobile
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        working-directory: mobile/smartdesk_mobile
+        run: flutter test
+
+      # Proves the app still compiles for a real target, which `flutter test` does not.
+      - name: Build APK
+        working-directory: mobile/smartdesk_mobile
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartdesk-mobile-apk
+          path: mobile/smartdesk_mobile/build/app/outputs/flutter-apk/app-debug.apk

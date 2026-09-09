@@ -117,6 +117,30 @@ public sealed class TicketsController(
     public async Task<ActionResult<IReadOnlyList<TicketHistoryDto>>> History(int id, CancellationToken ct)
         => Ok(await tickets.GetHistoryAsync(id, ct));
 
+    /// <summary>Uploads a screenshot/photo for a ticket. Ownership rules are identical to ticket viewing.</summary>
+    [HttpPost("{id:int}/attachments")]
+    [ProducesResponseType(typeof(TicketAttachmentDto), StatusCodes.Status201Created)]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<TicketAttachmentDto>> AddAttachment(int id, IFormFile file, CancellationToken ct)
+    {
+        if (file is null) throw new ValidationException("An image file is required.");
+        await using var stream = file.OpenReadStream();
+        var attachment = await tickets.AddAttachmentAsync(id, file.FileName, file.ContentType, stream, file.Length, ct);
+        return StatusCode(StatusCodes.Status201Created, attachment);
+    }
+
+    [HttpGet("{id:int}/attachments")]
+    [ProducesResponseType(typeof(IReadOnlyList<TicketAttachmentDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<TicketAttachmentDto>>> Attachments(int id, CancellationToken ct)
+        => Ok(await tickets.GetAttachmentsAsync(id, ct));
+
+    [HttpGet("{id:int}/attachments/{attachmentId:int}/content")]
+    public async Task<IActionResult> AttachmentContent(int id, int attachmentId, CancellationToken ct)
+    {
+        var file = await tickets.GetAttachmentContentAsync(id, attachmentId, ct);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
     // ---- Component B: assignment ----------------------------------------------------------
 
     /// <summary>Business operation: assign or reassign the ticket. Managers and administrators only.</summary>

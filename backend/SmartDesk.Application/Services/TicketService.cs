@@ -362,6 +362,71 @@ public sealed class TicketService(
             .ToListAsync(ct);
     }
 
+    // Images are intentionally persisted with the ticket rather than placed in a public file folder:
+    // the same ownership check protects both the metadata and the bytes.
+    public async Task<TicketAttachmentDto> AddAttachmentAsync(int ticketId, string fileName, string contentType,
+        Stream content, long sizeBytes, CancellationToken ct = default)
+    {
+        const long maxSize = 5 * 1024 * 1024;
+        var ticket = await db.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId, ct)
+            ?? throw new NotFoundException("Ticket", ticketId);
+        EnsureCanView(ticket);
+
+        if (sizeBytes <= 0 || sizeBytes > maxSize)
+            throw new ValidationException("Attachment must be an image no larger than 5 MB.");
+        if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Only image attachments are allowed.");
+
+        await using var memory = new MemoryStream();
+        await content.CopyToAsync(memory, ct);
+        if (memory.Length != sizeBytes || memory.Length > maxSize)
+            throw new ValidationException("The uploaded attachment is invalid or too large.");
+
+        var userId = RequireUserId();
+        var attachment = new TicketAttachment
+        {
+            TicketId = ticketId,
+            UploadedByUserId = userId,
+            FileName = Path.GetFileName(fileName),
+            ContentType = contentType,
+            SizeBytes = memory.Length,
+            Content = memory.ToArray(),
+            CreatedAt = clock.UtcNow
+        };
+        db.TicketAttachments.Add(attachment);
+        ticket.UpdatedAt = clock.UtcNow;
+        await db.SaveChangesAsync(ct);
+        await audit.LogAsync("Ticket", ticketId, "AttachmentAdded", ActorType.User, userId,
+            new { attachment.FileName, attachment.ContentType, attachment.SizeBytes }, ct);
+        return ToAttachmentDto(attachment);
+    }
+
+    public async Task<IReadOnlyList<TicketAttachmentDto>> GetAttachmentsAsync(int ticketId, CancellationToken ct = default)
+    {
+        var ticket = await db.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticketId, ct)
+            ?? throw new NotFoundException("Ticket", ticketId);
+        EnsureCanView(ticket);
+        return await db.TicketAttachments.AsNoTracking().Where(a => a.TicketId == ticketId)
+            .OrderBy(a => a.CreatedAt).Select(a => new TicketAttachmentDto(a.Id, a.FileName, a.ContentType,
+                a.SizeBytes, $"/api/tickets/{ticketId}/attachments/{a.Id}/content", a.CreatedAt)).ToListAsync(ct);
+    }
+
+    public async Task<(byte[] Content, string ContentType, string FileName)> GetAttachmentContentAsync(
+        int ticketId, int attachmentId, CancellationToken ct = default)
+    {
+        var ticket = await db.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticketId, ct)
+            ?? throw new NotFoundException("Ticket", ticketId);
+        EnsureCanView(ticket);
+        var attachment = await db.TicketAttachments.AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == attachmentId && a.TicketId == ticketId, ct)
+            ?? throw new NotFoundException("TicketAttachment", attachmentId);
+        return (attachment.Content, attachment.ContentType, attachment.FileName);
+    }
+
+    private static TicketAttachmentDto ToAttachmentDto(TicketAttachment attachment) => new(attachment.Id,
+        attachment.FileName, attachment.ContentType, attachment.SizeBytes,
+        $"/api/tickets/{attachment.TicketId}/attachments/{attachment.Id}/content", attachment.CreatedAt);
+
     // ---- Helpers ---------------------------------------------------------------------------
 
     private int RequireUserId() =>

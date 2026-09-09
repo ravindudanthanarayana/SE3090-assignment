@@ -134,3 +134,11 @@ public sealed record TicketHistoryDto(
     string? NewValue,
     string? Note,
     DateTime CreatedAt);
+
+public sealed record TicketAttachmentDto(
+    int Id,
+    string FileName,
+    string ContentType,
+    long SizeBytes,
+    string DownloadUrl,
+    DateTime CreatedAt);

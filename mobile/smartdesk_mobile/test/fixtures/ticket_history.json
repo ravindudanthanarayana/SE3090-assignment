@@ -1,0 +1,20 @@
+[
+    {
+        "id": 54,
+        "changedByName": "Jane Perera",
+        "field": "Status",
+        "oldValue": null,
+        "newValue": "New",
+        "note": "Ticket created",
+        "createdAt": "2026-09-09T07:39:22.457422Z"
+    },
+    {
+        "id": 55,
+        "changedByName": "System / AI",
+        "field": "AssignedTo",
+        "oldValue": null,
+        "newValue": "3",
+        "note": "Assigned via approved AI recommendation (approval #17).",
+        "createdAt": "2026-09-09T07:43:11.855354Z"
+    }
+]

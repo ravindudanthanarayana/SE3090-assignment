@@ -1,0 +1,39 @@
+{
+    "id": 33,
+    "ticketNumber": "TKT-000033",
+    "title": "VPN is not connecting from home",
+    "description": "My VPN client stopped connecting this morning. It shows error 809 right after I enter my credentials. I cannot reach any internal system and I am working remotely today.",
+    "categoryId": 1,
+    "categoryName": "Network",
+    "status": "Assigned",
+    "priority": "High",
+    "createdByUserId": 9,
+    "createdByName": "Jane Perera",
+    "assignedToUserId": 3,
+    "assignedToName": "Priya Network",
+    "slaDueAt": "2026-09-09T11:39:22.457422Z",
+    "slaState": "OnTrack",
+    "hoursUntilSlaDue": 3.92,
+    "isEscalated": false,
+    "escalatedAt": null,
+    "escalationReason": null,
+    "resolution": null,
+    "resolvedAt": null,
+    "closedAt": null,
+    "createdAt": "2026-09-09T07:39:22.457422Z",
+    "updatedAt": "2026-09-09T07:43:11.855354Z",
+    "allowedNextStatuses": [
+        "InProgress",
+        "OnHold",
+        "Escalated",
+        "Resolved"
+    ],
+    "suggestedArticles": [
+        {
+            "articleId": 1,
+            "title": "Resolving VPN connection failures",
+            "relevanceScore": 0.9,
+            "source": "Agent"
+        }
+    ]
+}

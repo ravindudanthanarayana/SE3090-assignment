@@ -18,6 +18,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<SupportAgentSkill> SupportAgentSkills => Set<SupportAgentSkill>();
     public DbSet<KnowledgeArticle> KnowledgeArticles => Set<KnowledgeArticle>();
     public DbSet<TicketArticleLink> TicketArticleLinks => Set<TicketArticleLink>();
+    public DbSet<TicketAttachment> TicketAttachments => Set<TicketAttachment>();
     public DbSet<AgentWorkflow> AgentWorkflows => Set<AgentWorkflow>();
     public DbSet<AgentStep> AgentSteps => Set<AgentStep>();
     public DbSet<AgentToolCall> AgentToolCalls => Set<AgentToolCall>();

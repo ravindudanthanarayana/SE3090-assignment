@@ -1,4 +1,4 @@
-# Git / CI Strategy, and the Flutter Gap
+# Git / CI Strategy, and the Flutter Gap (now closed)
 
 ## 1. Git and GitHub (spec §13)
 
@@ -44,23 +44,31 @@ job: frontend
   - npm ci
   - npm run build
   - npm run test -- --run
+job: mobile
+  - flutter-action 3.35.5 (pinned)
+  - flutter pub get
+  - flutter analyze --fatal-infos
+  - flutter test
+  - flutter build apk --debug   → uploaded as an artifact
 ```
 That satisfies "restores, builds and runs the automated backend tests on every push and pull request to main",
-plus the encouraged frontend pipeline.
+plus the encouraged frontend pipeline, plus the Flutter tests §12 asks for. The APK artifact is what
+§14.4 wants, produced by CI rather than by hand.
 
-## 3. Flutter gap analysis
+## 3. Flutter gap analysis — CLOSED
 
-Flutter is being built separately. Concretely, this phase leaves these spec items open:
+The app is built and lives in `mobile/smartdesk_mobile/`. See
+[`13-flutter-application.md`](13-flutter-application.md) for the full write-up.
 
-| Spec item | Marks at stake | Status after this phase |
+| Spec item | Marks at stake | Status |
 |---|---|---|
-| §8 Flutter application | **10 individual** | Not started. Backend requires **no changes** to support it. |
-| §14.4 runnable APK | part of Documentation & Deployment (group 10) | Pending |
-| §12 Flutter tests | part of Testing/CI/Git (8) | Pending |
-| §4.7 / §10.2 cross-platform end-to-end workflow | part of Integrated Architecture (group 10) + API Integration & Cross-Platform (10) | **Demonstrable today in React alone** (employee role initiates, manager role approves). Becomes fully compliant when the employee half moves to Flutter. |
-| §14.2 ADR for Flutter state management | part of Documentation (group 10) | Placeholder ADR-007 stub left |
+| §8 Flutter application | **10 individual** | ✅ Built. 8 screens, 17 reusable widgets, Riverpod, go_router, secure JWT storage, camera device feature. Backend required **no changes**. |
+| §14.4 runnable APK | part of Documentation & Deployment (group 10) | ✅ `flutter build apk` succeeds; CI uploads it as an artifact |
+| §12 Flutter tests | part of Testing/CI/Git (8) | ✅ 92 tests, including 9 against **real captured API payloads** |
+| §4.7 / §10.2 cross-platform end-to-end workflow | part of Integrated Architecture (group 10) + API Integration & Cross-Platform (10) | ✅ **Executed end to end**: Flutter employee raises a ticket → 5 agents run → approval gate → React manager approves → backend acts → Flutter shows the updated status and history. Documented in §13.4. |
+| §14.2 ADR for Flutter state management | part of Documentation (group 10) | ✅ ADR-007 decided (Riverpod), with the options and consequences written up |
 
-**What we do now to make Flutter cheap later**
+**Why it was cheap, as predicted**
 1. React is deliberately scoped to the *staff/manager/admin/AI-approval* side; Flutter's role (employee
    self-service: register, login, raise ticket, track status, view AI suggestion, comment) is left free —
    this is the "meaningful and different purposes" requirement of §4.5.
@@ -68,6 +76,9 @@ Flutter is being built separately. Concretely, this phase leaves these spec item
 3. JWT in an `Authorization` header, no cookies, no session affinity → works from Dart unchanged.
 4. All list endpoints return the same `{items, page, pageSize, totalCount, totalPages}` envelope.
 5. Errors are uniform `ProblemDetails`, so one Dart error mapper covers the whole API.
-6. Device feature (§8, required): the natural fit is **image attachment via camera/image picker** on ticket
-   creation. To keep that from becoming a backend change later, we will include a simple attachment field on
-   tickets now — decide with you whether to include it in this phase.
+6. Device feature (§8, required): **image attachment via camera/image picker** on ticket creation.
+   The attachment endpoints were already in place by the time the app was built, so this needed no
+   backend work either — upload, list and authorised download were verified byte-for-byte.
+
+Every one of those six predictions held. The only files outside `mobile/` that changed were
+documentation and the CI workflow.

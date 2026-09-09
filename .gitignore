@@ -23,6 +23,16 @@ dist-ssr/
 *.local
 coverage/
 
+# --- Flutter / Dart
+# The app has its own .gitignore; these cover the paths from the repository root.
+mobile/**/build/
+mobile/**/.dart_tool/
+mobile/**/.flutter-plugins-dependencies
+# Machine-specific: points at wherever this developer installed the Flutter SDK.
+mobile/**/android/local.properties
+mobile/**/ios/Flutter/Generated.xcconfig
+*.apk
+
 # --- Editors
 .vs/
 .vscode/

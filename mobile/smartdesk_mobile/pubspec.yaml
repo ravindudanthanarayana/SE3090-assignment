@@ -1,0 +1,51 @@
+name: smartdesk_mobile
+description: SmartDesk AI - employee self-service mobile client for the existing ASP.NET Core API.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management. Chosen over provider/bloc because it gives compile-time-safe
+  # dependency injection and async state (loading / data / error) without boilerplate.
+  # See docs/ADRs/ADR-007-flutter-state-management.md.
+  flutter_riverpod: ^2.6.1
+
+  # Declarative routing with a single redirect guard for protected routes.
+  go_router: ^14.6.2
+
+  # HTTP client. Interceptors are what let the JWT header and the 401 handling live
+  # in exactly one place.
+  dio: ^5.7.0
+
+  # Keychain / EncryptedSharedPreferences storage for the JWT. Never SharedPreferences.
+  flutter_secure_storage: ^9.2.2
+
+  # The device feature: camera capture and gallery selection for ticket screenshots.
+  image_picker: ^1.1.2
+
+  # Date formatting for the ticket timeline.
+  intl: ^0.19.0
+
+  # MediaType for the attachment upload, so the multipart part is tagged image/* and
+  # passes the server's content-type check.
+  http_parser: ^4.0.2
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # The SmartDesk logo mark, copied from frontend/public/logo-mark.png so both
+    # clients show the same brand. Keep the two in step if the logo changes.
+    - assets/brand/logo-mark.png

@@ -641,6 +641,49 @@ namespace SmartDesk.Infrastructure.Persistence.Migrations
                     b.ToTable("TicketAssignments", (string)null);
                 });
 
+            modelBuilder.Entity("SmartDesk.Domain.Entities.TicketAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UploadedByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.HasIndex("UploadedByUserId");
+
+                    b.ToTable("TicketAttachments", (string)null);
+                });
+
             modelBuilder.Entity("SmartDesk.Domain.Entities.TicketCategory", b =>
                 {
                     b.Property<int>("Id")
@@ -1016,6 +1059,25 @@ namespace SmartDesk.Infrastructure.Persistence.Migrations
                     b.Navigation("Ticket");
                 });
 
+            modelBuilder.Entity("SmartDesk.Domain.Entities.TicketAttachment", b =>
+                {
+                    b.HasOne("SmartDesk.Domain.Entities.Ticket", "Ticket")
+                        .WithMany("Attachments")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartDesk.Domain.Entities.User", "UploadedByUser")
+                        .WithMany()
+                        .HasForeignKey("UploadedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+
+                    b.Navigation("UploadedByUser");
+                });
+
             modelBuilder.Entity("SmartDesk.Domain.Entities.TicketComment", b =>
                 {
                     b.HasOne("SmartDesk.Domain.Entities.User", "AuthorUser")
@@ -1088,6 +1150,8 @@ namespace SmartDesk.Infrastructure.Persistence.Migrations
                     b.Navigation("ArticleLinks");
 
                     b.Navigation("Assignments");
+
+                    b.Navigation("Attachments");
 
                     b.Navigation("Comments");
 

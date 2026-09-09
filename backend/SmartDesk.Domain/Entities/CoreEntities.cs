@@ -77,7 +77,23 @@ public class Ticket
     public ICollection<TicketHistoryEntry> History { get; set; } = [];
     public ICollection<TicketAssignment> Assignments { get; set; } = [];
     public ICollection<TicketArticleLink> ArticleLinks { get; set; } = [];
+    public ICollection<TicketAttachment> Attachments { get; set; } = [];
     public ICollection<AgentWorkflow> Workflows { get; set; } = [];
+}
+
+/// <summary>A screenshot or photo supplied by the requester to make a support issue reproducible.</summary>
+public class TicketAttachment
+{
+    public int Id { get; set; }
+    public int TicketId { get; set; }
+    public Ticket Ticket { get; set; } = null!;
+    public int UploadedByUserId { get; set; }
+    public User UploadedByUser { get; set; } = null!;
+    public string FileName { get; set; } = string.Empty;
+    public string ContentType { get; set; } = string.Empty;
+    public long SizeBytes { get; set; }
+    public byte[] Content { get; set; } = [];
+    public DateTime CreatedAt { get; set; }
 }
 
 public class TicketComment

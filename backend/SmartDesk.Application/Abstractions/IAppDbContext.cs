@@ -23,6 +23,7 @@ public interface IAppDbContext
     DbSet<SupportAgentSkill> SupportAgentSkills { get; }
     DbSet<KnowledgeArticle> KnowledgeArticles { get; }
     DbSet<TicketArticleLink> TicketArticleLinks { get; }
+    DbSet<TicketAttachment> TicketAttachments { get; }
     DbSet<AgentWorkflow> AgentWorkflows { get; }
     DbSet<AgentStep> AgentSteps { get; }
     DbSet<AgentToolCall> AgentToolCalls { get; }
