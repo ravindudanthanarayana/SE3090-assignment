@@ -49,7 +49,7 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 | [Deployment](#11-deployment) | Neon, API host, Vercel |
 | [Repository structure](#12-repository-structure) | where everything lives |
 | [Security](#13-security-considerations) | what is protected and how |
-| [Individual contributions](#14-individual-contributions) | who owns what |
+| [Individual contributions](#14-individual-contributions) | the four components, their owners and what each delivers |
 | [AI usage declaration](#15-ai-usage-declaration) | required by spec section 18 |
 | [Operating notes](#16-operating-notes-from-running-against-the-real-services) | what we observed running against live Gemini and Neon |
 | [Known limitations](#17-known-limitations) | stated honestly, for the viva |
@@ -76,14 +76,18 @@ that actually changes ownership or escalates.
 
 ### The four business components
 
-Each is owned by one student (spec section 3).
+Each is owned by one student, end to end across the whole stack — not split by layer (spec section 3).
 
-| Component | Owns | Business operation beyond CRUD |
-|---|---|---|
-| **A. Ticket Management** | tickets, comments, history, categories | validated status-transition machine |
-| **B. Assignment & Workload** | assignments, agent skills, workload | deterministic skill-vs-workload assignment scoring |
-| **C. Knowledge Base** | knowledge articles, ticket–article links | ticket-aware article relevance ranking |
-| **D. SLA, Escalation & Reporting** | SLA state, escalation, dashboards, approvals | SLA-risk-driven escalation, approval-gated |
+| Component | Owner | Owns | Business operation beyond CRUD |
+|---|---|---|---|
+| **A. Ticket Management** | `IT24100858` Wijesinghe D.T.D | tickets, comments, history, categories | validated status-transition machine |
+| **B. Assignment & Workload** | `IT24100533` Danthanarayana D.M.R | assignments, agent skills, workload | deterministic skill-vs-workload assignment scoring |
+| **C. Knowledge Base** | `IT24101090` Jayakody N.D | knowledge articles, ticket–article links | ticket-aware article relevance ranking |
+| **D. SLA, Escalation & Reporting** | `IT23361690` Gunathilake B.M.P | SLA state, escalation, dashboards, approvals | SLA-risk-driven escalation, approval-gated |
+
+Each component carries at least four meaningful API endpoints plus one business-specific operation
+beyond CRUD, and each owner contributes an identifiable agent to the AI subsystem. Full breakdown in
+[section 14](#14-individual-contributions).
 
 ---
 
@@ -152,6 +156,14 @@ Spec section 9.3 requires *at least* four. The Planner is assessed under the **g
 ("Agent Orchestration"), while each of the four students needs their own agent for the 12-mark
 individual criterion. Splitting them gives four clean individual contributions plus direct evidence
 for the group criterion, at the cost of one extra prompt.
+
+| Agent | Owner | Responsibility | In → out | Tools |
+|---|---|---|---|---|
+| **PlannerAgent** | *Group* | Planning and coordination | objective + ticket summary → ordered multi-step plan | none — planning needs no data access |
+| **TriageAgent** | A · `IT24100858` Wijesinghe | Domain analysis | ticket text + category list → category, priority, urgency 1–5, keywords | `GetTicket` |
+| **SolutionAgent** | C · `IT24101090` Jayakody | Knowledge retrieval | triage output + ticket → matched article ids, steps, confidence | `SearchKnowledgeBase` |
+| **AssignmentAgent** | B · `IT24100533` Danthanarayana | Action / tool use | ticket, category, agent pool → recommended owner, score, alternatives | `GetSupportAgents`, `GetAgentWorkload`, `ScoreAssignmentCandidates` |
+| **ValidationAgent** | D · `IT23361690` Gunathilake | Validation and safety | all prior agent outputs → `isValid`, violations, SLA risk, escalate? | `CheckSla` |
 
 ### What makes each agent distinct (spec section 9.2)
 
@@ -564,21 +576,117 @@ Domain / Application / Infrastructure / Api.
 
 ## 14. Individual contributions
 
-| Student | Component | Agent | Branches |
-|---|---|---|---|
-| Student 1 | A — Ticket Management | **TriageAgent** | `feature/ticket-management`, `feature/agent-triage` |
-| Student 2 | B — Assignment & Workload | **AssignmentAgent** | `feature/assignment-management`, `feature/agent-assignment` |
-| Student 3 | C — Knowledge Base | **SolutionAgent** | `feature/knowledge-base`, `feature/agent-solution` |
-| Student 4 | D — SLA, Escalation & Reporting | **ValidationAgent** | `feature/sla-reporting`, `feature/agent-validation` |
-| Group | Orchestration | **PlannerAgent** | `feature/agent-orchestrator` |
+Four students, four business components, one agent each — plus a group-owned coordinator.
 
-Each student additionally delivers, for their own component: the EF entity and migration slice, the
-React screens, backend unit tests, agent evaluation tests for their agent, and the matching Flutter
-screens. Strategy: [`docs/09-git-ci-and-flutter-gap.md`](./docs/09-git-ci-and-flutter-gap.md).
+| Student | ID | Component | Agent | Branches |
+|---|---|---|---|---|
+| Wijesinghe D.T.D | `IT24100858` | A — Ticket Management | **TriageAgent** | `feature/ticket-management`, `feature/agent-triage` |
+| Danthanarayana D.M.R | `IT24100533` | B — Assignment & Workload | **AssignmentAgent** | `feature/assignment-management`, `feature/agent-assignment` |
+| Jayakody N.D | `IT24101090` | C — Knowledge Base | **SolutionAgent** | `feature/knowledge-base`, `feature/agent-solution` |
+| Gunathilake B.M.P | `IT23361690` | D — SLA, Escalation & Reporting | **ValidationAgent** | `feature/sla-reporting`, `feature/agent-validation` |
+| *Group* | — | Orchestration | **PlannerAgent** | `feature/agent-orchestrator` |
 
-> **⚠ This section must be filled in with real names and real commits before submission.**
-> Spec sections 13 and 18.2 explicitly reject back-filled commit history and final-day bulk uploads.
-> Every student must commit their own work incrementally and be able to explain it at the viva.
+### Component A — Ticket Management · `IT24100858` Wijesinghe D.T.D
+
+The front door: capture a problem as structured, trackable work with a controlled lifecycle and a
+full audit trail.
+
+| | |
+|---|---|
+| **Entities** | `Tickets`, `TicketComments`, `TicketHistory`, `TicketCategories`, `TicketAttachments` |
+| **Endpoints** | `GET /api/tickets` (search · filter · sort · page) · `GET /api/tickets/{id}` · `POST /api/tickets` · `PUT /api/tickets/{id}` · `GET`/`POST /api/tickets/{id}/comments` · `GET /api/tickets/{id}/history` |
+| **Beyond CRUD** | `POST /api/tickets/{id}/status` — a validated status-transition machine. Illegal moves are refused with `409`, not silently accepted. |
+| **React** | Ticket list with server-side search/filter/sort/pagination, ticket detail, comments, history timeline, category admin |
+| **Flutter** | My Tickets, Create Ticket form and validation, ticket detail with Overview / Comments / History tabs |
+| **Database** | Ticket schema, category FK, history table, unique ticket number, indexes on status / priority / created, `CreatedAt` / `UpdatedAt` audit fields |
+| **Agent** | **TriageAgent** — classifies category, priority and urgency from unstructured text. Tool: `GetTicket` |
+| **Third party** | Status-change notification email through the shared Resend integration |
+| **Tests** | Status-machine unit tests · ticket service authorization scoping · list query tests · React ticket screens · Flutter form validation |
+| **Security** | An Employee reads only their own tickets — enforced inside the SQL query, not by the client. Only the requester may edit, and only while `New` |
+
+Creates the record every other component acts on, and starts the agent workflow.
+
+### Component B — Assignment & Workload · `IT24100533` Danthanarayana D.M.R
+
+Get each ticket to the right person: balance skill against current load instead of assigning by hand.
+
+| | |
+|---|---|
+| **Entities** | `TicketAssignments`, `AgentSkills`, `Users` (SupportAgent) |
+| **Endpoints** | `GET /api/support-agents` · `GET /api/assignments/workload` · `GET /api/tickets/{id}/assignments` · `PUT /api/support-agents/{id}/skills` · `DELETE /api/support-agents/{id}/skills/{skillId}` |
+| **Beyond CRUD** | `POST /api/tickets/{id}/assign` — deterministic skill-vs-workload scoring, then a transactional (re)assignment that writes history and notifies |
+| **React** | Assignment console, agent workload dashboard, skill matrix editor, recommendation panel on a ticket |
+| **Flutter** | Assigned-agent display on ticket detail; the assignment result surfaced in the AI Support tab and history |
+| **Database** | Assignment history table, agent–skill join with proficiency, unique constraint per agent + category, FK delete behaviour, workload aggregation query |
+| **Agent** | **AssignmentAgent** — recommends an owner with a score and alternatives. Tools: `GetSupportAgents`, `GetAgentWorkload`, `ScoreAssignmentCandidates` |
+| **Third party** | Assignment notification email to the newly assigned agent |
+| **Tests** | Scoring algorithm unit tests · assignment authorization (an agent cannot self-assign) · workload query · React console · Flutter display |
+| **Security** | Assignment is Manager/Admin only; a support agent calling it gets `403`. The AI may only recommend — applying it requires approval |
+
+Owns the high-impact action that triggers the human approval gate in the cross-platform workflow.
+
+### Component C — Knowledge Base · `IT24101090` Jayakody N.D
+
+Reuse what has already been solved: surface the right article for a specific ticket so problems are
+not re-diagnosed.
+
+| | |
+|---|---|
+| **Entities** | `KnowledgeArticles`, `TicketArticleLinks` |
+| **Endpoints** | `GET /api/knowledge-articles` (search · filter · sort · page) · `GET /api/knowledge-articles/{id}` · `POST /api/knowledge-articles` · `PUT /api/knowledge-articles/{id}` · `DELETE /api/knowledge-articles/{id}` |
+| **Beyond CRUD** | `GET /api/tickets/{id}/relevant-articles` — ticket-aware relevance ranking, plus `POST .../link-article` to attach one as a suggested solution |
+| **React** | Article browser with search and filters, editor with publish/unpublish, relevance panel on a ticket, link-article action |
+| **Flutter** | Suggested-solution list on ticket detail; the AI's recommended steps rendered in the AI Support tab |
+| **Database** | Article schema with `text[]` tags, published flag, ticket–article join carrying relevance score and source, indexes supporting the search |
+| **Agent** | **SolutionAgent** — matches articles and drafts troubleshooting steps. Tool: `SearchKnowledgeBase`. Ids it did not receive from the tool are discarded |
+| **Third party** | Not primary — suggested articles are included in the notification body where relevant |
+| **Tests** | Relevance-ranking unit tests · publish/unpublish authorization · search query · React browser and editor · Flutter suggested-solution rendering |
+| **Security** | Employees see published articles only; authoring is staff-only. Article ids returned by the model are validated against the database before use |
+
+Supplies the low-impact AI action — article links are applied automatically, no approval needed.
+
+### Component D — SLA, Escalation & Reporting · `IT23361690` Gunathilake B.M.P
+
+Make the promise measurable: track SLA risk, escalate before a breach, report on it — and own the
+human approval gate.
+
+| | |
+|---|---|
+| **Entities** | `AiApprovals`, `AuditLogs`, `Notifications`, SLA fields on `Ticket` |
+| **Endpoints** | `GET /api/tickets/sla-at-risk` · `GET /api/reports/dashboard` · `GET /api/reports/sla` · `GET /api/ai/approvals` (the review queue) · `GET /api/audit-logs` |
+| **Beyond CRUD** | `POST /api/ai/approvals/{id}/decision` — the human-in-the-loop gate; approval executes the action in one transaction. Plus `POST /api/tickets/{id}/escalate` |
+| **React** | Approval Centre, SLA at-risk queue, analytics dashboard with charts, agent-performance report, audit-log viewer |
+| **Flutter** | SLA badge on tickets, escalation reason, and the approval's status and outcome shown read-only in the AI Support tab |
+| **Database** | Approval table with status and decision audit, audit-log table, notification rows, SLA deadline column, and the transaction that makes approval atomic |
+| **Agent** | **ValidationAgent** — checks SLA risk, decides whether escalation is warranted, reports rule violations. Tool: `CheckSla` |
+| **Third party** | Primary owner of the Resend integration — timeouts, retries, failure rows, and keeping the key server-side |
+| **Tests** | SLA calculation unit tests · approval authorization (`403` for an employee) · transaction atomicity · React Approval Centre · Flutter approval-status display |
+| **Security** | The approval gate is enforced in the service layer, not the UI — a hidden button changes nothing. Only `Approved` executes anything |
+
+Closes the cross-platform loop: the manager's decision here is what updates the employee's ticket in Flutter.
+
+### Every member covers every layer
+
+Owning a component is not enough — spec section 3 requires each student to contribute across the
+whole required stack and to have an identifiable Agentic AI contribution.
+
+| Required of every student | A · Wijesinghe | B · Danthanarayana | C · Jayakody | D · Gunathilake |
+|---|:---:|:---:|:---:|:---:|
+| ASP.NET Core endpoints | ✓ | ✓ | ✓ | ✓ |
+| PostgreSQL and data modelling | ✓ | ✓ | ✓ | ✓ |
+| React screens | ✓ | ✓ | ✓ | ✓ |
+| Flutter screens | ✓ | ✓ | ✓ | ✓ |
+| Distinct Agentic AI agent | ✓ | ✓ | ✓ | ✓ |
+| API integration and security | ✓ | ✓ | ✓ | ✓ |
+| Tests | ✓ | ✓ | ✓ | ✓ |
+| Git commits, PRs, reviews | ✓ | ✓ | ✓ | ✓ |
+| Documentation | ✓ | ✓ | ✓ | ✓ |
+
+Strategy: [`docs/09-git-ci-and-flutter-gap.md`](./docs/09-git-ci-and-flutter-gap.md).
+
+> **⚠ Git history is the evidence for this section.** Spec sections 13 and 18.2 explicitly reject
+> back-filled commit history and final-day bulk uploads. Every student must commit their own work
+> incrementally and be able to explain, modify, test and debug it at the viva.
 
 ---
 
