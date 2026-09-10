@@ -465,22 +465,11 @@ being hidden. Every recommendation row renders **only if the backend returned th
 
 Run end to end against the live API and the Neon database:
 
-```
-①  Flutter        employee raises "VPN is not connecting from home"      → TKT-000033
-②  ASP.NET Core   ticket committed, agent workflow starts in background
-③  Agents         Planner 3.9s → Triage 3.7s → Solution 4.1s → Assignment 5.4s → Validation 2.5s
-④  Rules          Triage: Network/High · 1 article linked automatically
-⑤  Approval gate  assignment is HIGH IMPACT → not applied → workflow parks
-    Flutter shows "Waiting for manager approval"
-⑥  React          manager opens the Approval Centre and approves
-⑦  ASP.NET Core   validates the decision, executes it in one transaction
-⑧  Flutter        Overview → "Assigned · Priya Network"
-                  History  → "Assigned to a support agent", actor System / AI,
-                             note "Assigned via approved AI recommendation (approval #17)"
-                  AI Support → Completed · Approved by Morgan Manager
-```
+<p align="center">
+  <img src="docs/images/cross-client-workflow.png" alt="From request to resolution: an employee raises TKT-000033 in Flutter, ASP.NET Core commits it and starts the agents, the business rules apply the low-impact changes, the assignment parks at the approval gate, a manager approves in the React Approval Centre, and the employee sees the assigned ticket with full history" width="900">
+</p>
 
-The employee **cannot** skip step ⑥ — `POST /api/ai/approvals/{id}/decision` returns 403 for an
+The employee **cannot** skip step 6 — `POST /api/ai/approvals/{id}/decision` returns 403 for an
 Employee. That is what makes this a real cross-client workflow rather than two views of the same
 permissions. The payloads from that run are committed in `test/fixtures/` and asserted by
 `live_payload_test.dart`, so the models are pinned to what the server really sends.
