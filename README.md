@@ -52,7 +52,6 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 | [Individual contributions](#14-individual-contributions) | the four components, their owners and what each delivers |
 | [AI usage declaration](#15-ai-usage-declaration) | required by spec section 18 |
 | [Operating notes](#16-operating-notes-from-running-against-the-real-services) | what we observed running against live Gemini and Neon |
-| [Known limitations](#17-known-limitations) | stated honestly, for the viva |
 
 Detailed design documents live in [`docs/`](./docs).
 
@@ -730,34 +729,3 @@ noticeably longer against Neon, because every tool call is a round-trip to us-ea
 the performance report.
 
 ---
-
-## 17. Known limitations
-
-Stated honestly, because the viva will ask.
-
-- **The Flutter app's light mode has not been eyeballed on a device.** It is implemented from the
-  same tokens as dark mode and covered by widget tests, but the live walkthrough was done on a
-  dark-mode machine.
-- **The Flutter tests are unit and widget tests**, plus assertions against real captured API
-  payloads. There is no automated integration test driving an emulator; the end-to-end
-  cross-client run was performed and observed manually
-  (see [`docs/13-flutter-application.md`](./docs/13-flutter-application.md) §13.4).
-- **`mobile/smartdesk_mobile/android/` deviates from the Flutter template** — Gradle 9.1 + AGP 8.13
-  so the build runs on the Java 25 that current Android Studio bundles, and the unused `ndkVersion`
-  pin removed.
-- **Knowledge search is `ILIKE` plus keyword scoring**, not full-text search. Adequate at seed scale;
-  the upgrade path (`pg_trgm` + GIN index) is documented in `docs/04-database-design.md`.
-- **The frontend bundle is ~816 KB** (237 KB gzipped), dominated by Recharts. Acceptable for an internal
-  tool; route-level code splitting is the fix if it matters. The marketing pages themselves ship no
-  extra dependencies — the hero visual, workflow diagram and product preview are all CSS and real
-  components, not images or an animation library.
-- **The contact form validates but does not send.** It says so on submit rather than pretending.
-  Real support requests go through the product, where they get a ticket and a full agent workflow.
-- **Password reset is not implemented**, so "Forgot password?" points at the contact page rather
-  than a route that does nothing.
-- **Notifications are fire-and-forget.** A failed send is recorded on the `Notifications` row but is
-  not retried later by a background job.
-- **Resend's free tier only delivers to the account owner's own address** until a domain is verified.
-  Use `NOTIFICATION_REDIRECT_TO` for demonstrations. The integration itself is real: a genuine HTTPS
-  call, a real message id on success, and a recorded `Failed` row with the provider's own error text
-  on rejection — and in both cases the business operation that triggered it still succeeds.
