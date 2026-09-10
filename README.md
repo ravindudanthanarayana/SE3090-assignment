@@ -110,23 +110,12 @@ Each is owned by one student (spec section 3).
 
 ## 4. Architecture
 
-```
-   React (Vercel)                    ┌──────────────────────────────────────┐
-   staff · manager · admin ──HTTPS──►│  ASP.NET Core Web API                │
-   · AI approval console             │                                      │
-                                     │  Controllers → Services → EF Core    │
-   Flutter (Android / iOS) ─────────►│         ↑                            │──► Gemini (HTTPS)
-   employee self-service             │  Agent Orchestrator                  │
-                                     │    Planner · Triage · Solution ·     │──► Resend (HTTPS)
-                                     │    Assignment · Validation           │
-                                     │         ↓ allow-listed tools only    │
-                                     └───────────────┬──────────────────────┘
-                                                     ▼
-                                          Neon PostgreSQL (TLS)
+<p align="center">
+  <img src="docs/images/architecture.png" alt="SmartDesk AI architecture: React and Flutter clients call the same ASP.NET Core Web API, which alone reaches Neon PostgreSQL, Gemini and Resend" width="900">
+</p>
 
-   Both clients call the SAME endpoints. Neither can reach the database or the
-   model directly — that boundary is structural, not a convention.
-```
+Both clients call the **same** endpoints. Neither can reach the database or the model
+directly — that boundary is structural, not a convention.
 
 A **modular monolith**: one codebase, one deployable, one database, one transaction boundary.
 Four students still own four folders. Full detail in [`docs/02-architecture.md`](./docs/02-architecture.md).
@@ -150,25 +139,9 @@ Full detail: [`docs/06-agentic-ai.md`](./docs/06-agentic-ai.md).
 
 ### The workflow
 
-```
-Employee raises a ticket
-   │  (the ticket is committed first — a failing AI can never block ticket creation)
-   ▼
-① PlannerAgent      → validated multi-step plan                          (no tools: planning needs no access)
-② TriageAgent       → category, priority, urgency                        tools: GetTicket
-③ SolutionAgent     → matched articles, troubleshooting steps            tools: SearchKnowledgeBase
-④ AssignmentAgent   → recommended owner + score                          tools: GetSupportAgents, GetAgentWorkload,
-                                                                                ScoreAssignmentCandidates
-⑤ ValidationAgent   → SLA risk, escalation decision, violations          tools: CheckSla
-   ▼
-BusinessRuleEngine — deterministic C#, decides what the advice is allowed to do
-   ├── low impact  → applied immediately (priority raise, article links)
-   └── HIGH IMPACT → AiApproval row, status Pending, workflow PAUSES
-                        ▼
-              Manager reviews in the React Approval Centre
-                 Approve → executed in ONE transaction → ticket updated + history + audit + email
-                 Reject / Request revision → nothing is executed
-```
+<p align="center">
+  <img src="docs/images/agentic-ai-workflow.png" alt="Agentic AI workflow: ticket committed first, then Planner, Triage, Solution, Assignment and Validation agents, then the BusinessRuleEngine routes low-impact advice straight through and high-impact advice to manager approval" width="900">
+</p>
 
 Any failure ends in a persisted `Failed` state with a recorded reason and an untouched ticket —
 the "safe, clearly recorded failure" spec section 9.1 requires.
