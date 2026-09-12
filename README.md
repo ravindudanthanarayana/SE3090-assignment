@@ -38,6 +38,23 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 
 ---
 
+## Seeded accounts
+
+All 8 seeded accounts share the same password: `Password123!`
+
+| # | Email | Password | Name | Role | Department |
+|---|---|---|---|---|---|
+| 1 | `admin@smartdesk.local` | `Password123!` | Alex Admin | Admin | IT |
+| 2 | `manager@smartdesk.local` | `Password123!` | Morgan Manager | SupportManager | IT Service Desk |
+| 3 | `agent1@smartdesk.local` | `Password123!` | Priya Network | SupportAgent | IT Service Desk |
+| 4 | `agent2@smartdesk.local` | `Password123!` | Sam Hardware | SupportAgent | IT Service Desk |
+| 5 | `agent3@smartdesk.local` | `Password123!` | Riya Software | SupportAgent | IT Service Desk |
+| 6 | `employee1@smartdesk.local` | `Password123!` | Dev Employee | Employee | Engineering |
+| 7 | `employee2@smartdesk.local` | `Password123!` | Fay Finance | Employee | Sales/Engineering |
+| 8 | `employee3@smartdesk.local` | `Password123!` | Hari Sales | Employee | Sales |
+
+---
+
 ## 1. Contents
 
 | Section | |
