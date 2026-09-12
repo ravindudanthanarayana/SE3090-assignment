@@ -11,8 +11,12 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 
 <br>
 
-[![Frontend](https://img.shields.io/badge/Frontend-se3090.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white)](https://se3090.vercel.app/)
-[![Backend API](https://img.shields.io/badge/Backend%20API-se3090--assignment.onrender.com-2ea44f?style=for-the-badge&logo=render&logoColor=white)](https://se3090-assignment.onrender.com)
+<a href="https://se3090.vercel.app/">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=24&duration=2200&pause=1000&color=F26522&center=true&vCenter=true&width=420&height=45&lines=%F0%9F%9A%80+Live+Frontend;se3090.vercel.app" alt="Frontend — se3090.vercel.app">
+</a>
+<a href="https://se3090-assignment.onrender.com">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=24&duration=2200&pause=1000&color=F26522&center=true&vCenter=true&width=420&height=45&lines=%E2%9A%99%EF%B8%8F+Live+Backend+API;se3090-assignment.onrender.com" alt="Backend API — se3090-assignment.onrender.com">
+</a>
 
 <br>
 
