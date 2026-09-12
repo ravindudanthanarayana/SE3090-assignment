@@ -16,12 +16,12 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 
 <br>
 
-[![CI](https://img.shields.io/badge/CI-passing-2ea44f?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-255%20passing-2ea44f?style=flat-square)](#8-testing)
-[![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white)](backend)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](frontend)
-[![Flutter](https://img.shields.io/badge/Flutter-3.35-02569B?style=flat-square&logo=flutter&logoColor=white)](mobile/smartdesk_mobile)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://neon.tech)
+[![CI](https://img.shields.io/badge/CI-passing-grey?style=flat-square&logo=githubactions&logoColor=lightgrey)](.github/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-255%20passing-grey?style=flat-square)](#8-testing)
+[![.NET](https://img.shields.io/badge/.NET-10-grey?style=flat-square&logo=dotnet&logoColor=lightgrey)](backend)
+[![React](https://img.shields.io/badge/React-19-grey?style=flat-square&logo=react&logoColor=lightgrey)](frontend)
+[![Flutter](https://img.shields.io/badge/Flutter-3.35-grey?style=flat-square&logo=flutter&logoColor=lightgrey)](mobile/smartdesk_mobile)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-grey?style=flat-square&logo=postgresql&logoColor=lightgrey)](https://neon.tech)
 
 <br>
 
