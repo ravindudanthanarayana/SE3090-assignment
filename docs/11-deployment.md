@@ -36,18 +36,19 @@ Satisfies spec §14. Three services, all on free tiers, no card required.
 ## 2. API — Render (Railway is an equivalent substitute)
 
 1. New → **Web Service**, connected to the GitHub repository.
-2. Runtime **Docker** is not required; use the native .NET environment.
+2. Render has no native .NET language option, so deploy via **Docker**:
+   - Language: `Docker`
    - Root directory: `backend`
-   - Build: `dotnet publish SmartDesk.Api -c Release -o out`
-   - Start: `dotnet out/SmartDesk.Api.dll`
+   - Dockerfile: `backend/Dockerfile` (Render finds it automatically once root directory is set)
+   - Leave Build/Start commands blank — the Dockerfile handles both, and reads Render's
+     injected `$PORT` at container start.
 3. Set environment variables:
 
 | Variable | Value | Required |
 |---|---|---|
 | `DATABASE_CONNECTION_STRING` | the Neon string from step 1 | **yes** |
 | `JWT_SECRET` | ≥32 chars, generated fresh: `openssl rand -base64 48` | **yes** |
-| `ASPNETCORE_URLS` | `http://0.0.0.0:$PORT` | yes on Render |
-| `ASPNETCORE_ENVIRONMENT` | `Production` | yes |
+| `ASPNETCORE_ENVIRONMENT` | `Production` | yes (also set by the Dockerfile as a default) |
 | `AI_API_KEY` | free Gemini key from [AI Studio](https://aistudio.google.com/apikey) | no — omit to use the scripted client |
 | `NOTIFICATION_API_KEY` | free [Resend](https://resend.com) key | no — omit to use the null provider |
 | `SEED_PASSWORD` | password for the demo accounts | recommended |
