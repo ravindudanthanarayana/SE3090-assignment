@@ -11,6 +11,11 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 
 <br>
 
+[![Frontend](https://img.shields.io/badge/Frontend-se3090.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white)](https://se3090.vercel.app/)
+[![Backend API](https://img.shields.io/badge/Backend%20API-se3090--assignment.onrender.com-2ea44f?style=for-the-badge&logo=render&logoColor=white)](https://se3090-assignment.onrender.com)
+
+<br>
+
 [![CI](https://img.shields.io/badge/CI-passing-2ea44f?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-255%20passing-2ea44f?style=flat-square)](#8-testing)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white)](backend)
