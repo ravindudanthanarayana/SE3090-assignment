@@ -11,17 +11,6 @@ check SLA risk. Anything high-impact **stops and waits for a manager**. Every st
 
 <br>
 
-<a href="https://se3090.vercel.app/">
-  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PGNpcmNsZSBjeD0iNiIgY3k9IjYiIHI9IjUiIGZpbGw9IiMyZWE0NGYiPjxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIHZhbHVlcz0iMTswLjI1OzEiIGR1cj0iMS40cyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiLz48YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJyIiB2YWx1ZXM9IjQ7NS41OzQiIGR1cj0iMS40cyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiLz48L2NpcmNsZT48L3N2Zz4=" width="10" height="10" valign="middle">
-  <img src="https://img.shields.io/badge/Frontend-se3090.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white" alt="Frontend" valign="middle">
-</a>
-<a href="https://se3090-assignment.onrender.com">
-  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiI+PGNpcmNsZSBjeD0iNiIgY3k9IjYiIHI9IjUiIGZpbGw9IiMyZWE0NGYiPjxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9Im9wYWNpdHkiIHZhbHVlcz0iMTswLjI1OzEiIGR1cj0iMS40cyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiLz48YW5pbWF0ZSBhdHRyaWJ1dGVOYW1lPSJyIiB2YWx1ZXM9IjQ7NS41OzQiIGR1cj0iMS40cyIgcmVwZWF0Q291bnQ9ImluZGVmaW5pdGUiLz48L2NpcmNsZT48L3N2Zz4=" width="10" height="10" valign="middle">
-  <img src="https://img.shields.io/badge/Backend%20API-se3090--assignment.onrender.com-2ea44f?style=for-the-badge&logo=render&logoColor=white" alt="Backend API" valign="middle">
-</a>
-
-<br>
-
 [![CI](https://img.shields.io/badge/CI-passing-grey?style=flat-square&logo=githubactions&logoColor=lightgrey)](.github/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-255%20passing-grey?style=flat-square)](#8-testing)
 [![.NET](https://img.shields.io/badge/.NET-10-grey?style=flat-square&logo=dotnet&logoColor=lightgrey)](backend)
