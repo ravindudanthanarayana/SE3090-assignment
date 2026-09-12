@@ -4,10 +4,10 @@
 
 # SmartDesk AI
 
-<sub><sub>**An Agentic AI powered IT help desk — with a human always in the loop.**</sub></sub>
+**An Agentic AI powered IT help desk — with a human always in the loop.**
 
-<sub><sub>Five specialist AI agents triage every ticket, search the knowledge base, recommend an owner and</sub></sub>
-<sub><sub>check SLA risk. Anything high-impact **stops and waits for a manager**. Every step is recorded.</sub></sub>
+Five specialist AI agents triage every ticket, search the knowledge base, recommend an owner and
+check SLA risk. Anything high-impact **stops and waits for a manager**. Every step is recorded.
 
 <br>
 
@@ -25,14 +25,14 @@
 
 <br>
 
-<sub><sub>**Three clients, one API, one database.**</sub></sub>
+**Three clients, one API, one database.**
 
 | | | |
 |:--:|:--:|:--:|
-| <sub><sub>🖥️&nbsp;&nbsp;**React web console**</sub></sub> | <sub><sub>📱&nbsp;&nbsp;**Flutter mobile app**</sub></sub> | <sub><sub>🤖&nbsp;&nbsp;**Agentic AI subsystem**</sub></sub> |
-| <sub><sub>Staff · managers · admins<br>Approval Centre, reporting</sub></sub> | <sub><sub>Employee self-service<br>Raise, track, camera attachments</sub></sub> | <sub><sub>Planner · Triage · Solution<br>Assignment · Validation</sub></sub> |
+| 🖥️&nbsp;&nbsp;**React web console** | 📱&nbsp;&nbsp;**Flutter mobile app** | 🤖&nbsp;&nbsp;**Agentic AI subsystem** |
+| Staff · managers · admins<br>Approval Centre, reporting | Employee self-service<br>Raise, track, camera attachments | Planner · Triage · Solution<br>Assignment · Validation |
 
-<sub><sub>Built for **SE3090 — Software Engineering Frameworks, Assignment 1**</sub></sub>
+<sub>Built for **SE3090 — Software Engineering Frameworks, Assignment 1**</sub>
 
 </div>
 
