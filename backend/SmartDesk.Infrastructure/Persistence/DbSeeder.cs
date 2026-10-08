@@ -33,7 +33,16 @@ public sealed class DbSeeder(
     public async Task SeedAsync(CancellationToken ct = default)
     {
         var now = DateTime.UtcNow;
-        var password = config["SEED_PASSWORD"] ?? DefaultDevPassword;
+        var password = config["SEED_PASSWORD"];
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Production";
+            if (!environment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException(
+                    "SEED_PASSWORD must be set outside Development before seeded accounts can be created.");
+
+            password = DefaultDevPassword;
+        }
 
         var roles = await SeedRolesAsync(ct);
         var categories = await SeedCategoriesAsync(now, ct);
