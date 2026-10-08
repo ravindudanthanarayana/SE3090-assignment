@@ -205,6 +205,10 @@ const Row = ({ label, value }: { label: string; value: string }) => (
 function ChangeStatusModal({ open, ticket, onClose, onDone }: {
   open: boolean; ticket: import('../types').TicketDetail; onClose: () => void; onDone: () => void;
 }) {
+  // Escalation has side effects and must go through the dedicated escalation endpoint.
+  // The API includes Escalated in allowedNextStatuses for the state-machine view, but
+  // TicketService intentionally rejects it from this generic status endpoint.
+  const normalNextStatuses = ticket.allowedNextStatuses.filter((s) => s !== 'Escalated');
   const [status, setStatus] = useState<TicketStatus | ''>('');
   const [note, setNote] = useState('');
   const [resolution, setResolution] = useState('');
@@ -241,11 +245,11 @@ function ChangeStatusModal({ open, ticket, onClose, onDone }: {
       <form onSubmit={submit} className="space-y-4">
         {error && <p role="alert" className="rounded bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
 
-        {/* Only transitions the backend will actually accept are offered. */}
+        {/* Escalated is intentionally omitted; use the separate Escalate action. */}
         <Select id="new-status" label="New status" value={status}
                 onChange={(e) => setStatus(e.target.value as TicketStatus)} required>
           <option value="">Choose…</option>
-          {ticket.allowedNextStatuses.map((s) => (
+          {normalNextStatuses.map((s) => (
             <option key={s} value={s}>{s.replace(/([a-z])([A-Z])/g, '$1 $2')}</option>
           ))}
         </Select>
