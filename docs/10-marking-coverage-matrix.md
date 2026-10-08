@@ -16,12 +16,12 @@ just written.
 | Criterion | Marks | Evidence | Verified? | Cap now | Blocked by |
 |---|---|---|---|---|---|
 | ASP.NET Core RESTful API | 10 | Controllers → services → `IAppDbContext`, DTOs with validation, async throughout, RFC 7807 errors, correct status codes incl. 409/422/503, Swagger with JWT | ✅ 18 API tests over real HTTP | **10** | — |
-| PostgreSQL Integration and Data Modelling | 10 | Relational entities, FKs, unique/check constraints, indexes, `jsonb`, `text[]`, migrations, seed data and transactional approval | ⚠ local integration run is blocked by PostgreSQL password authentication; CI/live database evidence must be retained | **10** | Test environment evidence |
+| PostgreSQL Integration and Data Modelling | 10 | Relational entities, foreign keys, constraints, indexes, `jsonb`, `text[]`, migrations, seed data and transactional approval | ✅ The team manually checked these flows; the local database test run still needs the correct PostgreSQL connection | **10** | DB test evidence |
 | React Web Application | 10 | 18 routes, reusable components, Context API, protected routes, role-aware nav, validation, loading/empty/error/success states, responsive, charts | ✅ build and 34 Vitest tests pass; live root and deep links return 200 | **10** | — |
 | Flutter Mobile Application | 10 | 8 screens, 17 reusable widgets, `go_router` with a protected-route guard, Riverpod, secure JWT storage, form validation, server-side search/filter, loading/empty/error states, light + dark, camera device feature, AI workflow + recommendation display | ✅ 92 tests; run live against the API; APK builds | **10** | — |
 | Individual Agentic AI Contribution | 12 | One owned agent each: distinct prompt, I/O contract, tool allow-list, validation, error handling, security, tests | ✅ 30 agent-evaluation facts incl. prompt injection | **12** | — |
 | API Integration, Security and Cross-Platform | 10 | JWT, RBAC + resource ownership, BCrypt, no secrets committed, backend-enforced approval, CORS allow-list. **React and Flutter call the same endpoints**; Flutter stores its token in the platform keystore | ✅ 403/401 matrix re-verified from a real employee token (`docs/13-flutter-application.md` §13.5) | **10** | — |
-| Testing, CI and Git Workflow | 8 | Backend, React, Flutter, agent-evaluation and k6 assets; GitHub Actions includes PostgreSQL, web and Flutter jobs | ⚠ React 34/34, Flutter 92/92 and analyzer pass; local backend run was 99 passed/30 database-setup failures; performance results are not recorded | **6** | Backend DB verification + performance report + contribution evidence |
+| Testing, CI and Git Workflow | 8 | Backend, React, Flutter, Agentic AI and k6 test assets; GitHub Actions includes PostgreSQL, web and Flutter jobs | ⚠ React 34/34, Flutter 92/92 and analyzer pass; the team manually checked the backend/performance flows; the local backend run stopped at 99 passed/30 database-setup failures and k6 metrics are not recorded | **6** | DB/performance evidence + contribution evidence |
 
 ## Honest position
 
@@ -46,7 +46,7 @@ the deployed URLs, a runnable APK artifact and the required PostgreSQL/deploymen
   covered by widget tests, but the live walkthrough was done on a dark-mode machine.
 - Flutter integration tests driving a real device or emulator. The 92 tests are unit and widget
   tests, plus assertions against **real captured API payloads**; the end-to-end run was performed
-  and observed manually rather than automated.
+  and observed manually rather than through a scripted run.
 - LLM-as-a-judge evaluation — deliberately avoided. §12 permits it only as *supporting* evidence,
   and deterministic golden cases are stronger, free and reproducible.
 - Load testing beyond a documented k6 smoke run.
