@@ -1,4 +1,5 @@
 using System.Text;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,29 @@ builder.Services
             ValidAudience = jwt.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret)),
             ClockSkew = TimeSpan.FromMinutes(1)
+        };
+
+        // Signature validation alone cannot revoke a token when an administrator deactivates
+        // the account. Re-check the current account state for every authenticated request.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(userId, out var id))
+                {
+                    context.Fail("The token does not identify a valid user.");
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+                var active = await db.Users.AsNoTracking()
+                    .Where(u => u.Id == id)
+                    .Select(u => u.IsActive)
+                    .SingleOrDefaultAsync(context.HttpContext.RequestAborted);
+
+                if (!active) context.Fail("The user account is inactive.");
+            }
         };
     });
 
