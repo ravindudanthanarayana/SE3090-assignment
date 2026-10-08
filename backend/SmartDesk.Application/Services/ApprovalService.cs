@@ -24,6 +24,7 @@ public sealed class ApprovalService(
 {
     public async Task<PagedResult<ApprovalDto>> QueryAsync(ApprovalQuery query, CancellationToken ct = default)
     {
+        EnsureCanReviewApprovals();
         var q = db.AiApprovals.AsNoTracking()
             .Include(a => a.Ticket)
             .Include(a => a.DecidedByUser)
@@ -53,8 +54,7 @@ public sealed class ApprovalService(
     public async Task<ApprovalDto> DecideAsync(int approvalId, ApprovalDecisionRequest request, CancellationToken ct = default)
     {
         // --- 1. Authorization. Checked in the service so every client is bound by it.
-        if (!currentUser.IsInRole(RoleNames.SupportManager, RoleNames.Admin))
-            throw new ForbiddenException("Only a support manager or administrator can decide an AI approval.");
+        EnsureCanReviewApprovals();
 
         var userId = currentUser.UserId ?? throw new ForbiddenException("Not authenticated.");
 
@@ -73,11 +73,25 @@ public sealed class ApprovalService(
             throw new ConflictException($"This approval has already been {approval.Status}.");
 
         var now = clock.UtcNow;
+        var decisionNote = request.Note?.Trim();
+
+        // Claim the pending row atomically. Two managers can otherwise both observe Pending and
+        // execute the same assignment/escalation before either transaction becomes visible.
+        var claimed = await db.AiApprovals
+            .Where(a => a.Id == approvalId && a.Status == ApprovalStatus.Pending)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(a => a.Status, request.Decision)
+                .SetProperty(a => a.DecidedByUserId, userId)
+                .SetProperty(a => a.DecidedAt, now)
+                .SetProperty(a => a.DecisionNote, decisionNote), ct);
+
+        if (claimed != 1)
+            throw new ConflictException("This approval has already been decided.");
+
         approval.Status = request.Decision;
         approval.DecidedByUserId = userId;
         approval.DecidedAt = now;
-        approval.DecisionNote = request.Note?.Trim();
-        await db.SaveChangesAsync(ct);
+        approval.DecisionNote = decisionNote;
 
         await audit.LogAsync("AiApproval", approval.Id, $"Approval{request.Decision}",
             ActorType.User, userId,
@@ -116,6 +130,7 @@ public sealed class ApprovalService(
 
     public async Task<ApprovalDto> GetAsync(int id, CancellationToken ct = default)
     {
+        EnsureCanReviewApprovals();
         var a = await db.AiApprovals.AsNoTracking()
             .Include(x => x.Ticket).Include(x => x.DecidedByUser)
             .FirstOrDefaultAsync(x => x.Id == id, ct)
@@ -125,6 +140,12 @@ public sealed class ApprovalService(
             a.Id, a.WorkflowId, a.TicketId, a.Ticket.TicketNumber, a.Ticket.Title,
             a.ActionType, a.ProposedActionJson, a.Reason, a.RiskLevel, a.Status,
             a.RequestedAt, a.DecidedByUser?.FullName, a.DecidedAt, a.DecisionNote);
+    }
+
+    private void EnsureCanReviewApprovals()
+    {
+        if (!currentUser.IsInRole(RoleNames.SupportManager, RoleNames.Admin))
+            throw new ForbiddenException("Only a support manager or administrator can review AI approvals.");
     }
 
     /// <summary>A workflow is only Completed once none of its approvals is still Pending.</summary>

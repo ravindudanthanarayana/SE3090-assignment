@@ -59,14 +59,14 @@ public sealed class AiController(
 
     /// <summary>Approval queue. Managers and administrators use this as their review feed.</summary>
     [HttpGet("approvals")]
-    [Authorize(Roles = RoleNames.Staff)]
+    [Authorize(Roles = RoleNames.ManagerOrAdmin)]
     [ProducesResponseType(typeof(PagedResult<ApprovalDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<ApprovalDto>>> ListApprovals(
         [FromQuery] ApprovalQuery query, CancellationToken ct)
         => Ok(await approvals.QueryAsync(query, ct));
 
     [HttpGet("approvals/{id:int}")]
-    [Authorize(Roles = RoleNames.Staff)]
+    [Authorize(Roles = RoleNames.ManagerOrAdmin)]
     [ProducesResponseType(typeof(ApprovalDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApprovalDto>> GetApproval(int id, CancellationToken ct)
         => Ok(await approvals.GetAsync(id, ct));
