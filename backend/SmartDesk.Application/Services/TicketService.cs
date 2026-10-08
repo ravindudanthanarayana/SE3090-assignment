@@ -167,7 +167,9 @@ public sealed class TicketService(
         var now = clock.UtcNow;
         var ticket = new Ticket
         {
-            TicketNumber = await NextTicketNumberAsync(ct),
+            // The database identity is the concurrency-safe source for the human-facing number.
+            // A temporary unique value is used until the first insert assigns the identity.
+            TicketNumber = $"TMP-{Guid.NewGuid():N}"[..20],
             Title = request.Title.Trim(),
             Description = request.Description.Trim(),
             CategoryId = category.Id,
@@ -181,6 +183,9 @@ public sealed class TicketService(
         };
 
         db.Tickets.Add(ticket);
+        await db.SaveChangesAsync(ct);
+
+        ticket.TicketNumber = $"TKT-{ticket.Id:D6}";
         await db.SaveChangesAsync(ct);
 
         db.TicketHistory.Add(new TicketHistoryEntry
@@ -382,6 +387,10 @@ public sealed class TicketService(
         if (memory.Length != sizeBytes || memory.Length > maxSize)
             throw new ValidationException("The uploaded attachment is invalid or too large.");
 
+        var bytes = memory.GetBuffer().AsSpan(0, checked((int)memory.Length));
+        if (!HasKnownImageSignature(bytes))
+            throw new ValidationException("The uploaded file is not a recognised image.");
+
         var userId = RequireUserId();
         var attachment = new TicketAttachment
         {
@@ -426,6 +435,12 @@ public sealed class TicketService(
     private static TicketAttachmentDto ToAttachmentDto(TicketAttachment attachment) => new(attachment.Id,
         attachment.FileName, attachment.ContentType, attachment.SizeBytes,
         $"/api/tickets/{attachment.TicketId}/attachments/{attachment.Id}/content", attachment.CreatedAt);
+
+    private static bool HasKnownImageSignature(ReadOnlySpan<byte> bytes) =>
+        (bytes.Length >= 8 && bytes[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A })) ||
+        (bytes.Length >= 3 && bytes[..3].SequenceEqual(new byte[] { 0xFF, 0xD8, 0xFF })) ||
+        (bytes.Length >= 6 && (bytes[..6].SequenceEqual("GIF87a"u8) || bytes[..6].SequenceEqual("GIF89a"u8))) ||
+        (bytes.Length >= 12 && bytes[..4].SequenceEqual("RIFF"u8) && bytes[8..12].SequenceEqual("WEBP"u8));
 
     // ---- Helpers ---------------------------------------------------------------------------
 
@@ -475,13 +490,6 @@ public sealed class TicketService(
             TicketId = ticketId, ChangedByUserId = userId,
             Field = field, OldValue = oldValue, NewValue = newValue, Note = note, CreatedAt = now
         });
-    }
-
-    /// <summary>Generates the next human-facing ticket number. Uniqueness is also enforced by a DB constraint.</summary>
-    private async Task<string> NextTicketNumberAsync(CancellationToken ct)
-    {
-        var last = await db.Tickets.OrderByDescending(t => t.Id).Select(t => t.Id).FirstOrDefaultAsync(ct);
-        return $"TKT-{last + 1:D6}";
     }
 
     internal static TicketListItemDto ToListItem(Ticket t, DateTime now) =>
