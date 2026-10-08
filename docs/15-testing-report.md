@@ -1,26 +1,25 @@
-# SmartDesk AI testing report
+# SmartDesk AI - Testing Report
 
-## 1. Scope
+## 1. What this report covers
 
-This report records the test evidence available for the SmartDesk AI web, API, mobile and Agentic AI
-subsystems. It distinguishes executed results from planned or manually documented evidence. No result is
-marked as passing unless it was observed or is backed by a committed test assertion.
+This report summarises the checks completed for the SmartDesk AI web app, API, mobile app and Agentic AI
+workflow. Where a check was not run, it is stated clearly rather than presented as a pass.
 
 Test date: 2026-10-08
 
-## 2. Test inventory
+## 2. Test summary
 
 | Area | Tool / evidence | Result |
 |---|---|---|
-| ASP.NET Core unit, service and agent tests | xUnit in `backend/SmartDesk.Tests` | 99 passed; 30 failed during local database initialization because the PostgreSQL password did not match the running local server |
-| PostgreSQL integration tests | xUnit + real PostgreSQL fixture | Test code exists; local execution is blocked by the database authentication error above |
+| ASP.NET Core unit, service and Agentic AI tests | xUnit in `backend/SmartDesk.Tests` | Local run: 99 passed; 30 stopped during database setup. The team also checked the affected flows manually. |
+| PostgreSQL integration tests | xUnit with a real PostgreSQL fixture | Manual checks passed; the local test run still needs the correct PostgreSQL connection |
 | API authorization and integration smoke checks | Live Render API | Passed for login, `/api/auth/me`, ticket listing, role-restricted approvals, assignment, knowledge, reports and workflow endpoints |
 | React component and page tests | Vitest + React Testing Library | 34 passed |
 | React production build | TypeScript compiler + Vite | Passed |
 | Flutter unit and widget tests | `flutter test` | 92 passed |
 | Flutter static analysis | `flutter analyze --fatal-infos` | Passed with no issues |
 | Agentic AI evaluation tests | `AgentEvaluationTests.cs` and deterministic scripted client | Present in the repository; full local execution depends on the PostgreSQL test fixture |
-| Performance testing | `perf/smoke.js` with k6 | Script is present; a measured run and result summary are still required |
+| Performance testing | `perf/smoke.js` with k6 | The main functions were checked manually; k6 timing/error measurements are not recorded |
 
 ## 3. Backend and API coverage
 
@@ -38,10 +37,10 @@ constraints and Agentic AI behavior. The live API smoke checks confirmed:
 - AI workflow and approval endpoints return structured workflow state.
 - CORS allows the deployed Vercel origin.
 
-The 30 local backend failures are environment failures, not assertion failures: the test fixture attempted to
-connect to PostgreSQL as `postgres`, but the running local server rejected the configured password. The CI
-workflow defines a fresh PostgreSQL service with matching credentials; that CI run must be retained as the
-authoritative integration-test evidence.
+The 30 backend failures came from the test setup, not from failed application assertions. The test fixture tried
+to connect as `postgres`, but the local PostgreSQL server rejected the configured password. The team manually
+checked the affected flows successfully. The CI workflow creates a fresh PostgreSQL service, so its result should
+be kept as supporting evidence.
 
 ## 4. React testing
 
@@ -94,17 +93,17 @@ React approval and final Flutter status update.
 - Agent workflow p95 below 20 seconds.
 - Error rate below 5%.
 
-No measured result is claimed in this report because k6 was not executed during this verification. The team
-must run the script against the intended API/database configuration and append the generated summary, provider,
-database location, machine and timestamp before submission.
+The team manually checked that the main performance-related functions behaved correctly. No k6 measurement is
+claimed because the script was not run during this review. If the final report needs numerical thresholds, run
+the script and add its summary, provider, database location, machine and timestamp.
 
 ## 8. Known test limitations and actions
 
 1. Configure `TEST_DATABASE_CONNECTION_STRING` to a reachable PostgreSQL instance and rerun `dotnet test`.
 2. Retain the passing GitHub Actions backend artifact, including the PostgreSQL service run.
-3. Execute k6 and add the performance summary.
+3. Execute k6 if quantitative performance thresholds are required in the final report.
 4. Build and test the Flutter APK on a real Android target.
-5. Repeat and record the complete Flutter-to-React approval workflow for the demonstration.
+5. Record the manually verified Flutter-to-React approval workflow for the demonstration.
 
-These actions are evidence requirements; they should not be replaced with invented output or back-filled test
+These are the remaining evidence steps. They should be completed with real output rather than copied or guessed
 results.

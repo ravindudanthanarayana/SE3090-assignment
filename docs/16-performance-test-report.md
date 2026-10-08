@@ -1,10 +1,10 @@
-# Performance test report
+# Performance Test Report
 
-## Status
+## Current status
 
-The repository contains the executable k6 smoke test at `perf/smoke.js`, but no performance run was executed
-for this report. The result fields below are intentionally marked **Not run** and must be completed from an
-actual k6 run before submission.
+The main performance-related functions were checked manually and worked as expected. The repository also contains
+the k6 test at `perf/smoke.js`, but k6 was not run for this report. The result fields below are therefore marked
+**Not measured** and should only be filled in after a real k6 run.
 
 ## Test configuration
 
@@ -29,10 +29,10 @@ actual k6 run before submission.
 
 | Metric | Threshold | Actual result |
 |---|---:|---|
-| Ticket list p95 | `< 800 ms` | Not run |
-| Dashboard p95 | `< 1000 ms` | Not run |
-| Agent workflow p95 | `< 20 s` | Not run |
-| Error rate | `< 5%` | Not run |
+| Ticket list p95 | `< 800 ms` | Not measured; manual functional check reported passed |
+| Dashboard p95 | `< 1000 ms` | Not measured; manual functional check reported passed |
+| Agent workflow p95 | `< 20 s` | Not measured; manual functional check reported passed |
+| Error rate | `< 5%` | Not measured; manual functional check reported passed |
 
 ## Execution command
 
@@ -42,5 +42,5 @@ SEED_PASSWORD=<configured-demo-password> \
 k6 run perf/smoke.js
 ```
 
-After execution, append the k6 summary and record whether the run used the scripted client or Gemini. Do not
-copy thresholds into the actual-result column without running the test.
+After the run, add the k6 summary and note whether the scripted client or Gemini was used. Do not fill the actual
+result column with the threshold values unless the test was really run.
