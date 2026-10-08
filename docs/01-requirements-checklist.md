@@ -15,7 +15,7 @@ Legend for **Phase**: `WEB` = built now · `FLUTTER` = out of scope now (built s
 | 2.2 | Data access: EF Core with PostgreSQL provider | EF Core 10 + `Npgsql.EntityFrameworkCore.PostgreSQL` in `SmartDesk.Infrastructure` | WEB |
 | 2.3 | Database: PostgreSQL | Neon serverless PostgreSQL | WEB |
 | 2.4 | React: functional components, hooks, routing, **justified** state management | Vite + React 19 + TypeScript, React Router 7, Context API (ADR-001) | WEB |
-| 2.5 | Flutter + Dart with justified state management | — | FLUTTER |
+| 2.5 | Flutter + Dart with justified state management | Flutter/Dart mobile client using Riverpod and go_router (ADR-007) | FLUTTER |
 | 2.6 | Agentic AI: any suitable **and justified** framework (LangGraph, MS Agent Framework, LlamaIndex, ADK, **or a custom orchestration approach**) | Custom in-process C# orchestrator (ADR-002) | WEB |
 | 2.7 | Git + GitHub from project start, incl. GitHub Actions CI | `.github/workflows/ci.yml` | WEB |
 | 2.8 | Testing tools for backend, React, Flutter, integration, performance, agent evaluation | xUnit, Vitest+RTL, k6, golden-case agent evals | WEB (Flutter tests later) |
@@ -39,9 +39,9 @@ Legend for **Phase**: `WEB` = built now · `FLUTTER` = out of scope now (built s
 | 4.2 | **≥3 user roles** with different responsibilities/permissions | 4 roles: Employee, SupportAgent, SupportManager, Admin | WEB |
 | 4.3 | **≥4 major business components** with relational data and business-specific operations | A: Tickets · B: Assignment · C: Knowledge Base · D: SLA/Escalation/Reporting | WEB |
 | 4.4 | CRUD **plus** status workflows, search, filtering, sorting, pagination, reporting/analytics | All implemented server-side on `/api/tickets` and `/api/knowledge-articles`; `/api/reports/*` | WEB |
-| 4.5 | Meaningful and **different** purposes for React vs Flutter | React = staff/admin/manager/AI-approval console. Flutter = employee self-service (raise ticket, track status). Backend designed for both. | WEB (design) / FLUTTER |
-| 4.6 | **≥1 third-party service integration** | Email notification provider through `INotificationService` (see `07-third-party.md`) | WEB |
-| 4.7 | **≥1 complete cross-platform workflow** React + Flutter + API + PostgreSQL + Agentic AI | Designed: Employee raises ticket → AI workflow → **Manager approves in React** → status returns to initiator. React implements *both* ends now so it is demonstrable standalone. | WEB (both ends) / FLUTTER (initiator) |
+| 4.5 | Meaningful and **different** purposes for React vs Flutter | React = staff/admin/manager/AI-approval console. Flutter = employee self-service (raise ticket, track status). | Satisfied; see `docs/13-flutter-application.md` |
+| 4.6 | **≥1 third-party service integration** | Backend-routed Resend email notifications through `INotificationService`, with a null provider for deterministic tests. | Implemented; live provider evidence belongs in the report |
+| 4.7 | **≥1 complete cross-platform workflow** React + Flutter + API + PostgreSQL + Agentic AI | Recorded workflow: Flutter employee raises a ticket → five-agent workflow → React manager approves → API updates PostgreSQL → Flutter shows the updated status/history. | Implemented; reproduce during demonstration |
 
 ## §5 Part 1 — Secure ASP.NET Core RESTful API
 
@@ -77,8 +77,11 @@ Legend for **Phase**: `WEB` = built now · `FLUTTER` = out of scope now (built s
 | 7.6 | Responsive + accessible UI with loading / empty / success / error states | Tailwind, shared `<AsyncState>` wrapper, toasts, focus/aria attributes | WEB |
 | 7.7 | Agent workflow monitoring, execution summaries, approve/reject/**revise** controls | AI Workflows, Workflow Detail (timeline), Approval Center with 3 actions | WEB |
 
-## §8 Part 4 — Flutter — **DEFERRED**
-All of §8 (widgets, routing, state mgmt, secure token storage, forms, device feature, APK) is out of scope for this phase. Impact is analysed in `09-flutter-gap.md`. The backend is designed so Flutter needs **zero** new endpoints.
+## §8 Part 4 — Flutter
+The Flutter client is implemented in `mobile/smartdesk_mobile/`. It provides employee registration/login/logout,
+secure token storage, protected routing, ticket creation/search/filtering, status/history tracking, AI workflow
+display, and camera/gallery attachments. The implementation and demonstration evidence are documented in
+`docs/13-flutter-application.md`.
 
 ## §9 Part 5 — Agentic AI subsystem
 
@@ -99,8 +102,8 @@ All of §8 (widgets, routing, state mgmt, secure token storage, forms, device fe
 ## §10 Required integrated architecture
 | # | Requirement | Status |
 |---|---|---|
-| 10.1 | React + Flutter → same ASP.NET Core API → same PostgreSQL → Agentic AI | Backend + React done now; Flutter slots in unchanged |
-| 10.2 | **End-to-end evidence**: workflow begins in one client, passes through API + PostgreSQL + AI, requires review/approval **in the other client**, returns updated status to the initiator | Partially satisfiable now (React initiates *and* approves as different roles). Fully satisfied once Flutter is added — see `09-flutter-gap.md` |
+| 10.1 | React + Flutter → same ASP.NET Core API → same PostgreSQL → Agentic AI | Both clients use the shared API; the agentic subsystem runs inside ASP.NET Core. |
+| 10.2 | **End-to-end evidence**: workflow begins in one client, passes through API + PostgreSQL + AI, requires review/approval **in the other client**, returns updated status to the initiator | Recorded in `docs/13-flutter-application.md` §13.4; reproduce during the final demonstration. |
 
 ## §11 Third-party integration
 Business purpose, backend-routed access, protected credentials, timeout/invalid-response/failure/rate-limit handling, data minimisation → `docs/07-third-party.md`. **WEB.**
@@ -111,7 +114,7 @@ Business purpose, backend-routed access, protected credentials, timeout/invalid-
 | Backend | unit, service-layer, validation, authn/authz, controller, API integration | xUnit + `WebApplicationFactory` | WEB |
 | Database | PostgreSQL integration, constraints, migrations, transactions | xUnit against a real Postgres service container in CI | WEB |
 | React | component, form validation, protected route, API integration, error state | Vitest + RTL | WEB |
-| Flutter | unit, widget, form, navigation, API | — | FLUTTER |
+| Flutter | unit, widget, form, navigation, API | `flutter test` — 92 tests; `flutter analyze --fatal-infos` clean | FLUTTER |
 | End to end | ≥1 complete client → API → PostgreSQL → Agentic AI workflow | E2E xUnit test + scripted demo | WEB |
 | Performance | concurrency, response time, success/failure rate, DB response, AI latency | k6 script + report template | WEB |
 | Agent evaluation | golden case covering planning/delegation, agent+tool selection, structured output, deterministic validation, business-rule compliance, approval enforcement, **prompt-injection resistance**, failure recovery, safe failure | Deterministic scripted-LLM golden cases | WEB |
@@ -123,10 +126,10 @@ Repo from day one · meaningful commits, feature branches, issues, PRs, reviews,
 ## §14 Deployment and documentation
 | # | Requirement | Plan | Phase |
 |---|---|---|---|
-| 14.1 | API deployed with working **health URL** and **Swagger URL** | `/health` + `/swagger`; platform choice in ADR-005 | WEB |
+| 14.1 | API deployed with working **health URL** and **Swagger URL** | Live Render API: `/health` and `/swagger/index.html` return 200 | Verified |
 | 14.2 | PostgreSQL deployed securely, migrations, restricted credentials, init instructions | Neon + `docs/10-deployment.md` | WEB |
-| 14.3 | React deployed, live URL, pointing at deployed API | Vercel | WEB |
-| 14.4 | Flutter source + runnable APK | — | FLUTTER |
+| 14.3 | React deployed, live URL, pointing at deployed API | Live Vercel app; root and protected deep links return 200 after SPA rewrite | Verified |
+| 14.4 | Flutter source + runnable APK | Flutter source is present and CI builds/uploads a debug APK artifact | Build artifact must be retained for submission |
 | 14.5 | Agentic AI deployed/runnable with setup, model requirements and startup order | Runs in-process; documented | WEB |
 | 14.6 | README + technical documentation (overview, roles, architecture, DB, install, env vars, API docs, test instructions, deployment, live URLs, test accounts, contributions, security, AI declaration) | `README.md` + `docs/` | WEB + PROC |
 | 14.7 | **ADR** — min: React state mgmt, Flutter state mgmt, Agentic AI framework/orchestration, DB schema strategy for agent workflow state, cloud deployment platform (3–6 decisions typical) | 6 ADRs in `docs/ADRs/` (Flutter one written when Flutter is built) | WEB + PROC |
@@ -150,4 +153,6 @@ Level 4 (Full AI) during development **with disclosure**; Level 1 (No AI) at dem
 5. **§17.1** demo line "React and Flutter using the same API".
 6. **ADR** for Flutter state management (§14.2) — placeholder left.
 
-Nothing else in the PDF is blocked by deferring Flutter.
+The remaining submission risks are evidence and process items rather than core application features: the
+consolidated PDF, demonstration video, individual AI logs/reflections/declarations, completed performance
+results, and demonstrable GitHub issue/PR/review/project-board history.
