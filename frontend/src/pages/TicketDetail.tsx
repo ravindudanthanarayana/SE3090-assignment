@@ -175,7 +175,7 @@ function DetailsTab({ ticket, isStaff, isManager, canWorkOn, onChanged }: {
       </div>
 
       <ChangeStatusModal
-        open={statusOpen} ticket={ticket}
+        open={statusOpen} ticket={ticket} canEscalate={isManager && !ticket.isEscalated}
         onClose={() => setStatusOpen(false)}
         onDone={() => { setStatusOpen(false); onChanged(); toast.success('Status updated.'); }}
       />
@@ -202,15 +202,13 @@ const Row = ({ label, value }: { label: string; value: string }) => (
 
 // ---- Action modals ---------------------------------------------------------------------------
 
-function ChangeStatusModal({ open, ticket, onClose, onDone }: {
-  open: boolean; ticket: import('../types').TicketDetail; onClose: () => void; onDone: () => void;
+function ChangeStatusModal({ open, ticket, canEscalate, onClose, onDone }: {
+  open: boolean; ticket: import('../types').TicketDetail; canEscalate: boolean;
+  onClose: () => void; onDone: () => void;
 }) {
-  // Escalation has side effects and must go through the dedicated escalation endpoint.
-  // The API includes Escalated in allowedNextStatuses for the state-machine view, but
-  // TicketService intentionally rejects it from this generic status endpoint.
-  const normalNextStatuses = ticket.allowedNextStatuses.filter((s) => s !== 'Escalated');
   const [status, setStatus] = useState<TicketStatus | ''>('');
   const [note, setNote] = useState('');
+  const [reason, setReason] = useState('');
   const [resolution, setResolution] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -222,12 +220,20 @@ function ChangeStatusModal({ open, ticket, onClose, onDone }: {
       setError('A resolution is required when resolving a ticket.');
       return;
     }
+    if (status === 'Escalated' && reason.trim().length < 10) {
+      setError('Give an escalation reason of at least 10 characters.');
+      return;
+    }
 
     setBusy(true); setError(null);
     try {
-      await ticketsApi.changeStatus(ticket.id, {
-        status, note: note.trim() || undefined, resolution: resolution.trim() || undefined,
-      });
+      if (status === 'Escalated') {
+        await ticketsApi.escalate(ticket.id, reason.trim());
+      } else {
+        await ticketsApi.changeStatus(ticket.id, {
+          status, note: note.trim() || undefined, resolution: resolution.trim() || undefined,
+        });
+      }
       onDone();
     } catch (err) {
       setError(errorMessage(err));
@@ -245,11 +251,12 @@ function ChangeStatusModal({ open, ticket, onClose, onDone }: {
       <form onSubmit={submit} className="space-y-4">
         {error && <p role="alert" className="rounded bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
 
-        {/* Escalated is intentionally omitted; use the separate Escalate action. */}
         <Select id="new-status" label="New status" value={status}
                 onChange={(e) => setStatus(e.target.value as TicketStatus)} required>
           <option value="">Choose…</option>
-          {normalNextStatuses.map((s) => (
+          {ticket.allowedNextStatuses
+            .filter((s) => s !== 'Escalated' || canEscalate)
+            .map((s) => (
             <option key={s} value={s}>{s.replace(/([a-z])([A-Z])/g, '$1 $2')}</option>
           ))}
         </Select>
@@ -258,6 +265,12 @@ function ChangeStatusModal({ open, ticket, onClose, onDone }: {
           <TextArea id="resolution" label="Resolution" rows={4} required
                     value={resolution} onChange={(e) => setResolution(e.target.value)}
                     hint="What fixed it? The requester will see this." />
+        )}
+
+        {status === 'Escalated' && (
+          <TextArea id="status-escalation-reason" label="Why does this need escalating?" rows={3} required
+                    value={reason} onChange={(e) => setReason(e.target.value)} minLength={10}
+                    hint="This records the reason and notifies the requester." />
         )}
 
         <TextArea id="note" label="Note" rows={3} value={note} onChange={(e) => setNote(e.target.value)}
