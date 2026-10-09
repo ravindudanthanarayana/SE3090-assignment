@@ -2,9 +2,8 @@
 
 ## Current status
 
-The k6 smoke test was run against the deployed Render API on 9 October 2026. The run produced a real summary
-artifact at `perf/k6-summary.json`. The application endpoints responded successfully, but the run did not meet
-all target thresholds, so the failed measurements are recorded below rather than being presented as a pass.
+The k6 smoke test was run against the deployed Render API on 9 October 2026 after the query, workflow fallback
+and k6-user-session fixes. The final run produced a real summary artifact at `perf/k6-summary.json`.
 
 ## Test configuration
 
@@ -30,29 +29,29 @@ all target thresholds, so the failed measurements are recorded below rather than
 
 | Metric | Threshold | Actual result |
 |---|---:|---|
-| Ticket list p95 | `< 800 ms` | **2,121 ms — failed** |
-| Dashboard p95 | `< 1000 ms` | **2,306 ms — failed** |
-| Agent workflow p95 | `< 20 s` | **20,524 ms — failed** |
-| Error rate | `< 5%` | **100% in the custom workflow-error metric — failed** |
+| Ticket list p95 | `< 800 ms` | **2,420 ms — failed** |
+| Dashboard p95 | `< 1000 ms` | **1,817 ms — failed** |
+| Agent workflow p95 | `< 20 s` | **19,680 ms — passed** |
+| Error rate | `< 5%` | **0.24% — passed** |
 
 ## Run summary
 
 | Measurement | Result |
 |---|---:|
 | Maximum virtual users | 12 |
-| Completed iterations | 44 |
-| HTTP requests | 202 |
-| HTTP transport failures | 0% |
-| Checks passed | 170/172 (98.83%) |
-| Ticket-list average | 1,231 ms |
-| Dashboard average | 1,256 ms |
-| Agent workflow average | 15,241 ms |
+| Completed iterations | 136 |
+| HTTP requests | 461 |
+| HTTP transport failures | 0.21% |
+| Checks passed | 413/414 (99.75%) |
+| Ticket-list average | 1,011 ms |
+| Dashboard average | 723 ms |
+| Agent workflow average | 15,393 ms |
 
-The two failed checks were the workflow outcome checks: both created test tickets reached a failed workflow
-state. This means the deployed service was reachable and ticket creation worked, but the AI workflow path needs
-investigation before the performance requirement can be marked passed. The read endpoints also exceeded the
-assignment targets under the configured load, so this run is evidence of the current production performance,
-not evidence that the thresholds were satisfied.
+The final run confirms that ticket creation and workflow completion are reliable under the scenario. The
+bounded Gemini fallback kept the workflow below 20 seconds and the corrected k6 rate now counts successful
+checks, producing a meaningful 0.24% error rate. The list and dashboard p95 targets are still exceeded by
+the deployed Render/Neon read-path tail latency, so those two thresholds remain open for infrastructure or
+query-plan optimization.
 
 ## Execution command
 

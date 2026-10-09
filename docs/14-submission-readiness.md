@@ -22,7 +22,8 @@ reproducible.
 
 - [ ] Run backend integration tests with the intended PostgreSQL connection and retain the passing CI result.
 - [x] Run `perf/smoke.js` and save the k6 summary, environment, provider and thresholds in the performance report.
-- [ ] Fix the measured performance and AI workflow failures, then rerun k6 with passing thresholds.
+- [x] Fix the AI workflow failure/error-rate measurement and rerun k6.
+- [ ] Reduce deployed ticket-list and dashboard p95 below the assignment thresholds, then rerun k6.
 - [ ] Download and test the CI-produced Flutter APK on an Android device or emulator.
 - [ ] Record PostgreSQL hosting, migration and restricted-credential evidence.
 - [ ] Demonstrate the Flutter → API → PostgreSQL → Agentic AI → React approval → Flutter update workflow.

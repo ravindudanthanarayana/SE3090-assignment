@@ -93,16 +93,16 @@ React approval and final Flutter status update.
 - Agent workflow p95 below 20 seconds.
 - Error rate below 5%.
 
-The deployed k6 run is recorded in `docs/16-performance-test-report.md` and `perf/k6-summary.json`. The
-service returned HTTP responses successfully, but list p95 (2,121 ms), dashboard p95 (2,306 ms), workflow p95
-(20,524 ms) and the custom workflow-error rate (100%) exceeded the configured targets. The run is therefore
-useful evidence of the current production behavior, not a passing performance result.
+The deployed k6 run is recorded in `docs/16-performance-test-report.md` and `perf/k6-summary.json`. The final
+run recorded list p95 at 2,420 ms and dashboard p95 at 1,817 ms, while workflow p95 was 19,680 ms and the
+error rate was 0.24%. The AI workflow and reliability targets now pass; the two read-endpoint latency targets
+remain open because of the deployed Render/Neon tail latency.
 
 ## 8. Known test limitations and actions
 
 1. Configure `TEST_DATABASE_CONNECTION_STRING` to a reachable PostgreSQL instance and rerun `dotnet test`.
 2. Retain the passing GitHub Actions backend artifact, including the PostgreSQL service run.
-3. Investigate the measured read-endpoint and workflow latency, then rerun k6 after the fixes.
+3. Reduce deployed ticket-list and dashboard tail latency, then rerun k6.
 4. Build and test the Flutter APK on a real Android target.
 5. Record the manually verified Flutter-to-React approval workflow for the demonstration.
 
