@@ -5,7 +5,7 @@
 This report summarises the checks completed for the SmartDesk AI web app, API, mobile app and Agentic AI
 workflow. Where a check was not run, it is stated clearly rather than presented as a pass.
 
-Test date: 2026-10-08
+Test date: 2026-10-09
 
 ## 2. Test summary
 
@@ -19,7 +19,7 @@ Test date: 2026-10-08
 | Flutter unit and widget tests | `flutter test` | 92 passed |
 | Flutter static analysis | `flutter analyze --fatal-infos` | Passed with no issues |
 | Agentic AI evaluation tests | `AgentEvaluationTests.cs` and deterministic scripted client | Present in the repository; full local execution depends on the PostgreSQL test fixture |
-| Performance testing | `perf/smoke.js` with k6 | The main functions were checked manually; k6 timing/error measurements are not recorded |
+| Performance testing | `perf/smoke.js` with k6 | Real deployed run recorded in `docs/16-performance-test-report.md`; response-time and workflow thresholds were not met |
 
 ## 3. Backend and API coverage
 
@@ -93,15 +93,16 @@ React approval and final Flutter status update.
 - Agent workflow p95 below 20 seconds.
 - Error rate below 5%.
 
-The team manually checked that the main performance-related functions behaved correctly. No k6 measurement is
-claimed because the script was not run during this review. If the final report needs numerical thresholds, run
-the script and add its summary, provider, database location, machine and timestamp.
+The deployed k6 run is recorded in `docs/16-performance-test-report.md` and `perf/k6-summary.json`. The
+service returned HTTP responses successfully, but list p95 (2,121 ms), dashboard p95 (2,306 ms), workflow p95
+(20,524 ms) and the custom workflow-error rate (100%) exceeded the configured targets. The run is therefore
+useful evidence of the current production behavior, not a passing performance result.
 
 ## 8. Known test limitations and actions
 
 1. Configure `TEST_DATABASE_CONNECTION_STRING` to a reachable PostgreSQL instance and rerun `dotnet test`.
 2. Retain the passing GitHub Actions backend artifact, including the PostgreSQL service run.
-3. Execute k6 if quantitative performance thresholds are required in the final report.
+3. Investigate the measured read-endpoint and workflow latency, then rerun k6 after the fixes.
 4. Build and test the Flutter APK on a real Android target.
 5. Record the manually verified Flutter-to-React approval workflow for the demonstration.
 

@@ -2,9 +2,9 @@
 
 ## Current status
 
-The main performance-related functions were checked manually and worked as expected. The repository also contains
-the k6 test at `perf/smoke.js`, but k6 was not run for this report. The result fields below are therefore marked
-**Not measured** and should only be filled in after a real k6 run.
+The k6 smoke test was run against the deployed Render API on 9 October 2026. The run produced a real summary
+artifact at `perf/k6-summary.json`. The application endpoints responded successfully, but the run did not meet
+all target thresholds, so the failed measurements are recorded below rather than being presented as a pass.
 
 ## Test configuration
 
@@ -12,11 +12,12 @@ the k6 test at `perf/smoke.js`, but k6 was not run for this report. The result f
 |---|---|
 | Tool | k6 |
 | Script | `perf/smoke.js` |
-| Target API | Not run |
-| Database | Not recorded |
-| AI provider | Not recorded |
-| Machine/runtime | Not recorded |
-| Date/time | Not recorded |
+| Target API | `https://se3090-assignment.onrender.com` |
+| Database | Deployed PostgreSQL service used by Render |
+| AI provider | Deployed provider configuration; provider name is not exposed to the test client |
+| Machine/runtime | Windows, local k6 execution |
+| k6 version | 2.3.0 |
+| Date/time | 2026-10-09 (Asia/Colombo) |
 
 ## Scenarios
 
@@ -29,10 +30,29 @@ the k6 test at `perf/smoke.js`, but k6 was not run for this report. The result f
 
 | Metric | Threshold | Actual result |
 |---|---:|---|
-| Ticket list p95 | `< 800 ms` | Not measured; manual functional check reported passed |
-| Dashboard p95 | `< 1000 ms` | Not measured; manual functional check reported passed |
-| Agent workflow p95 | `< 20 s` | Not measured; manual functional check reported passed |
-| Error rate | `< 5%` | Not measured; manual functional check reported passed |
+| Ticket list p95 | `< 800 ms` | **2,121 ms — failed** |
+| Dashboard p95 | `< 1000 ms` | **2,306 ms — failed** |
+| Agent workflow p95 | `< 20 s` | **20,524 ms — failed** |
+| Error rate | `< 5%` | **100% in the custom workflow-error metric — failed** |
+
+## Run summary
+
+| Measurement | Result |
+|---|---:|
+| Maximum virtual users | 12 |
+| Completed iterations | 44 |
+| HTTP requests | 202 |
+| HTTP transport failures | 0% |
+| Checks passed | 170/172 (98.83%) |
+| Ticket-list average | 1,231 ms |
+| Dashboard average | 1,256 ms |
+| Agent workflow average | 15,241 ms |
+
+The two failed checks were the workflow outcome checks: both created test tickets reached a failed workflow
+state. This means the deployed service was reachable and ticket creation worked, but the AI workflow path needs
+investigation before the performance requirement can be marked passed. The read endpoints also exceeded the
+assignment targets under the configured load, so this run is evidence of the current production performance,
+not evidence that the thresholds were satisfied.
 
 ## Execution command
 
@@ -42,5 +62,5 @@ SEED_PASSWORD=<configured-demo-password> \
 k6 run perf/smoke.js
 ```
 
-After the run, add the k6 summary and note whether the scripted client or Gemini was used. Do not fill the actual
-result column with the threshold values unless the test was really run.
+The raw k6 summary is committed as `perf/k6-summary.json`. Run the same command again after performance or AI
+workflow fixes and replace the measured values only with results from that new run.
