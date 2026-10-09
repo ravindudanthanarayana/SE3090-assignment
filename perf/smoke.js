@@ -22,6 +22,11 @@ const dashboardDuration = new Trend('dashboard_duration');
 const workflowLatency = new Trend('ai_workflow_latency');
 const errorRate = new Rate('errors');
 
+// k6 VUs keep their own JavaScript state. Reuse one token per VU so the scenario models a
+// signed-in user browsing the console, instead of performing a login before every page request.
+let managerToken;
+let employeeToken;
+
 export const options = {
   scenarios: {
     // Steady read load: what the service desk looks like during a normal working hour.
@@ -71,7 +76,8 @@ function authHeaders(token) {
 
 /** Read-heavy path: sign in, list tickets with filters, open the dashboard. */
 export function browse() {
-  const token = login('manager@smartdesk.local');
+  managerToken ||= login('manager@smartdesk.local');
+  const token = managerToken;
   if (!token) return;
 
   const list = http.get(
@@ -99,7 +105,8 @@ export function browse() {
 
 /** Write path: raise a ticket, then measure how long the agent workflow takes to settle. */
 export function raiseTicket() {
-  const token = login('employee1@smartdesk.local');
+  employeeToken ||= login('employee1@smartdesk.local');
+  const token = employeeToken;
   if (!token) return;
 
   const created = http.post(
