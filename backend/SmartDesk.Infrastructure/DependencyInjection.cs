@@ -23,6 +23,7 @@ public static class DependencyInjection
     /// </summary>
     public static IServiceCollection AddSmartDesk(this IServiceCollection services, IConfiguration config)
     {
+        services.AddMemoryCache();
         services.AddSmartDeskDatabase(config);
         services.AddSmartDeskSecurity(config);
         services.AddSmartDeskAi(config);

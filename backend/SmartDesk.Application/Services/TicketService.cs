@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SmartDesk.Application.Abstractions;
 using SmartDesk.Application.BusinessRules;
 using SmartDesk.Application.Common;
@@ -19,7 +20,8 @@ public sealed class TicketService(
     ICurrentUser currentUser,
     IAuditService audit,
     INotificationService notifications,
-    IClock clock)
+    IClock clock,
+    IMemoryCache cache)
 {
     // ---- Read ---------------------------------------------------------------------------
 
@@ -29,6 +31,12 @@ public sealed class TicketService(
     /// </summary>
     public async Task<PagedResult<TicketListItemDto>> QueryAsync(TicketQuery query, CancellationToken ct = default)
     {
+        var cacheKey = $"ticket-list:{currentUser.UserId}:{currentUser.Role}:{query.Page}:{query.PageSize}:" +
+                       $"{query.Search}:{query.Status}:{query.Priority}:{query.CategoryId}:{query.AssignedToUserId}:" +
+                       $"{query.Unassigned}:{query.SlaState}:{query.SortBy}:{query.SortDir}";
+        if (cache.TryGetValue(cacheKey, out PagedResult<TicketListItemDto>? cached) && cached is not null)
+            return cached;
+
         var now = clock.UtcNow;
         var open = TicketStatusMachine.OpenStatuses;
         var q = BuildFilteredQuery(query, now, open);
@@ -68,7 +76,9 @@ public sealed class TicketService(
                 .Select(t => ToListItem(t, now))
                 .ToList();
 
-            return new PagedResult<TicketListItemDto>(page, query.Page, query.PageSize, matching.Count);
+            var result = new PagedResult<TicketListItemDto>(page, query.Page, query.PageSize, matching.Count);
+            cache.Set(cacheKey, result, TimeSpan.FromSeconds(2));
+            return result;
         }
 
         var total = await q.CountAsync(ct);
@@ -81,8 +91,10 @@ public sealed class TicketService(
                 t.AssignedToUserId, t.SlaDueAt, t.IsEscalated, t.CreatedAt, t.UpdatedAt))
             .ToListAsync(ct);
 
-        return new PagedResult<TicketListItemDto>(
+        var paged = new PagedResult<TicketListItemDto>(
             items.Select(t => t.ToListItem(now)).ToList(), query.Page, query.PageSize, total);
+        cache.Set(cacheKey, paged, TimeSpan.FromSeconds(2));
+        return paged;
     }
 
     /// <summary>

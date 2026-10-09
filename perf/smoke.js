@@ -66,7 +66,8 @@ function login(email) {
     { headers: { 'Content-Type': 'application/json' }, tags: { endpoint: 'login' } },
   );
   loginDuration.add(res.timings.duration);
-  check(res, { 'login succeeded': (r) => r.status === 200 }) || errorRate.add(1);
+  const loginOk = check(res, { 'login succeeded': (r) => r.status === 200 });
+  errorRate.add(loginOk ? 0 : 1);
   return res.status === 200 ? res.json('token') : null;
 }
 
@@ -85,20 +86,23 @@ export function browse() {
     { ...authHeaders(token), tags: { endpoint: 'list' } },
   );
   listDuration.add(list.timings.duration);
-  check(list, { 'ticket list returned 200': (r) => r.status === 200 }) || errorRate.add(1);
+  const listOk = check(list, { 'ticket list returned 200': (r) => r.status === 200 });
+  errorRate.add(listOk ? 0 : 1);
 
   const search = http.get(
     `${BASE_URL}/api/tickets?search=vpn&pageSize=10`,
     { ...authHeaders(token), tags: { endpoint: 'list' } },
   );
-  check(search, { 'search returned 200': (r) => r.status === 200 }) || errorRate.add(1);
+  const searchOk = check(search, { 'search returned 200': (r) => r.status === 200 });
+  errorRate.add(searchOk ? 0 : 1);
 
   const dashboard = http.get(
     `${BASE_URL}/api/reports/dashboard`,
     { ...authHeaders(token), tags: { endpoint: 'dashboard' } },
   );
   dashboardDuration.add(dashboard.timings.duration);
-  check(dashboard, { 'dashboard returned 200': (r) => r.status === 200 }) || errorRate.add(1);
+  const dashboardOk = check(dashboard, { 'dashboard returned 200': (r) => r.status === 200 });
+  errorRate.add(dashboardOk ? 0 : 1);
 
   sleep(1);
 }
@@ -120,8 +124,9 @@ export function raiseTicket() {
     { ...authHeaders(token), tags: { endpoint: 'create' } },
   );
 
-  if (!check(created, { 'ticket created': (r) => r.status === 201 })) {
-    errorRate.add(1);
+  const ticketCreated = check(created, { 'ticket created': (r) => r.status === 201 });
+  errorRate.add(ticketCreated ? 0 : 1);
+  if (!ticketCreated) {
     return;
   }
 
@@ -143,7 +148,8 @@ export function raiseTicket() {
       const status = items[0].status;
       if (['AwaitingApproval', 'Completed', 'Failed', 'Rejected'].includes(status)) {
         workflowLatency.add(Date.now() - startedAt);
-        check(items[0], { 'workflow did not fail': (w) => w.status !== 'Failed' }) || errorRate.add(1);
+        const workflowOk = check(items[0], { 'workflow did not fail': (w) => w.status !== 'Failed' });
+        errorRate.add(workflowOk ? 0 : 1);
         return;
       }
     }

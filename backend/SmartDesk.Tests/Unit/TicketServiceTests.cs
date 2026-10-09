@@ -4,6 +4,7 @@ using SmartDesk.Application.Services;
 using SmartDesk.Domain.Common;
 using SmartDesk.Domain.Enums;
 using SmartDesk.Infrastructure.Persistence;
+using Microsoft.Extensions.Caching.Memory;
 using SmartDesk.Tests.Support;
 
 namespace SmartDesk.Tests.Unit;
@@ -24,7 +25,8 @@ public class TicketServiceTests : IDisposable
     public void Dispose() => _db.Dispose();
 
     private TicketService ServiceAs(int userId, string role)
-        => new(_db, new FakeCurrentUser(userId, role), _audit, _notifications, _clock);
+        => new(_db, new FakeCurrentUser(userId, role), _audit, _notifications, _clock,
+            new MemoryCache(new MemoryCacheOptions()));
 
     // ---- Creation -----------------------------------------------------------------------
 
