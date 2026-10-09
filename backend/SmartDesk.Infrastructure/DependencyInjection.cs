@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SmartDesk.Application.Abstractions;
 using SmartDesk.Application.Agents;
 using SmartDesk.Application.Agents.Tools;
@@ -86,7 +87,12 @@ public static class DependencyInjection
 
         if (llm.Provider.Equals("gemini", StringComparison.OrdinalIgnoreCase))
         {
-            services.AddHttpClient<ILlmClient, GeminiLlmClient>(c => c.Timeout = TimeSpan.FromSeconds(60));
+            services.AddHttpClient<GeminiLlmClient>(c => c.Timeout = TimeSpan.FromSeconds(60));
+            services.AddSingleton<ScriptedLlmClient>();
+            services.AddScoped<ILlmClient>(sp => new ResilientLlmClient(
+                sp.GetRequiredService<GeminiLlmClient>(),
+                sp.GetRequiredService<ScriptedLlmClient>(),
+                sp.GetRequiredService<ILogger<ResilientLlmClient>>()));
         }
         else
         {

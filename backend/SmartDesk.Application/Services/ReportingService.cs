@@ -25,7 +25,7 @@ public sealed class ReportingService(
         var now = clock.UtcNow;
         var open = TicketStatusMachine.OpenStatuses;
 
-        var q = db.Tickets.AsNoTracking().Include(t => t.Category).AsQueryable();
+        var q = db.Tickets.AsNoTracking().AsQueryable();
 
         // An employee's dashboard shows only their own tickets.
         if (currentUser.IsInRole(RoleNames.Employee))

@@ -29,16 +29,20 @@ public static class SlaCalculator
     }
 
     public static SlaState GetState(Ticket ticket, DateTime nowUtc)
+        => GetState(ticket.Status, ticket.SlaDueAt, ticket.CreatedAt, nowUtc);
+
+    /// <summary>Calculates state from scalar values for efficient list projections.</summary>
+    public static SlaState GetState(TicketStatus status, DateTime slaDueAt, DateTime createdAtUtc, DateTime nowUtc)
     {
         // A finished ticket no longer has a live SLA clock.
-        if (ticket.Status is TicketStatus.Resolved or TicketStatus.Closed or TicketStatus.Cancelled)
+        if (status is TicketStatus.Resolved or TicketStatus.Closed or TicketStatus.Cancelled)
             return SlaState.NotApplicable;
 
-        if (nowUtc >= ticket.SlaDueAt)
+        if (nowUtc >= slaDueAt)
             return SlaState.Breached;
 
-        var total = (ticket.SlaDueAt - ticket.CreatedAt).TotalHours;
-        var remaining = (ticket.SlaDueAt - nowUtc).TotalHours;
+        var total = (slaDueAt - createdAtUtc).TotalHours;
+        var remaining = (slaDueAt - nowUtc).TotalHours;
         if (total <= 0)
             return SlaState.Breached;
 

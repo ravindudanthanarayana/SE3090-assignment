@@ -117,6 +117,32 @@ public sealed class GeminiLlmClient(HttpClient http, LlmOptions options, ILogger
 }
 
 /// <summary>
+/// Keeps the workflow usable when the hosted model is temporarily unavailable or rate limited.
+/// The scripted client is deterministic, schema-valid and already used by the evaluation suite;
+/// it is a safe degradation path, not a replacement for the configured third-party integration.
+/// </summary>
+public sealed class ResilientLlmClient(
+    GeminiLlmClient primary,
+    ScriptedLlmClient fallback,
+    ILogger<ResilientLlmClient> logger) : ILlmClient
+{
+    public string ProviderName => $"{primary.ProviderName} (scripted fallback enabled)";
+
+    public async Task<string> CompleteJsonAsync(string systemPrompt, string userContent, CancellationToken ct = default)
+    {
+        try
+        {
+            return await primary.CompleteJsonAsync(systemPrompt, userContent, ct);
+        }
+        catch (DownstreamUnavailableException ex) when (!ct.IsCancellationRequested)
+        {
+            logger.LogWarning("LLM provider unavailable; using deterministic fallback: {Reason}", ex.Message);
+            return await fallback.CompleteJsonAsync(systemPrompt, userContent, ct);
+        }
+    }
+}
+
+/// <summary>
 /// Deterministic offline client. Every agent evaluation test runs against this, so the golden cases
 /// assert real behaviour without network access, cost or model variance - which is exactly what
 /// spec section 12 asks for when it says LLM-as-a-judge must not be the only evaluation method.

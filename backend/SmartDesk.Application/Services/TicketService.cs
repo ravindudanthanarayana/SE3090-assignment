@@ -53,7 +53,11 @@ public sealed class TicketService(
         // this to still-open, not-yet-breached tickets, so the refinement runs over a small set.
         if (query.SlaState is Domain.Enums.SlaState.AtRisk or Domain.Enums.SlaState.OnTrack)
         {
-            var candidates = await q.ToListAsync(ct);
+            var candidates = await q
+                .Include(t => t.Category)
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.AssignedToUser)
+                .ToListAsync(ct);
             var matching = candidates
                 .Where(t => SlaCalculator.GetState(t, now) == query.SlaState)
                 .ToList();
@@ -71,10 +75,14 @@ public sealed class TicketService(
         var items = await q
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
+            .Select(t => new TicketListRow(
+                t.Id, t.TicketNumber, t.Title, t.Category.Name, t.Status, t.Priority,
+                t.CreatedByUser.FullName, t.AssignedToUser == null ? null : t.AssignedToUser.FullName,
+                t.AssignedToUserId, t.SlaDueAt, t.IsEscalated, t.CreatedAt, t.UpdatedAt))
             .ToListAsync(ct);
 
         return new PagedResult<TicketListItemDto>(
-            items.Select(t => ToListItem(t, now)).ToList(), query.Page, query.PageSize, total);
+            items.Select(t => t.ToListItem(now)).ToList(), query.Page, query.PageSize, total);
     }
 
     /// <summary>
@@ -83,11 +91,7 @@ public sealed class TicketService(
     /// </summary>
     private IQueryable<Ticket> BuildFilteredQuery(TicketQuery query, DateTime now, TicketStatus[] open)
     {
-        var q = db.Tickets.AsNoTracking()
-            .Include(t => t.Category)
-            .Include(t => t.CreatedByUser)
-            .Include(t => t.AssignedToUser)
-            .AsQueryable();
+        var q = db.Tickets.AsNoTracking().AsQueryable();
 
         // Authorization is part of the query, so an employee's own scope is enforced in SQL
         // rather than by filtering rows after they have already been read.
@@ -490,6 +494,17 @@ public sealed class TicketService(
             TicketId = ticketId, ChangedByUserId = userId,
             Field = field, OldValue = oldValue, NewValue = newValue, Note = note, CreatedAt = now
         });
+    }
+
+    private sealed record TicketListRow(
+        int Id, string TicketNumber, string Title, string CategoryName, TicketStatus Status,
+        TicketPriority Priority, string CreatedByName, string? AssignedToName, int? AssignedToUserId,
+        DateTime SlaDueAt, bool IsEscalated, DateTime CreatedAt, DateTime UpdatedAt)
+    {
+        internal TicketListItemDto ToListItem(DateTime now) => new(
+            Id, TicketNumber, Title, CategoryName, Status, Priority, CreatedByName, AssignedToName,
+            AssignedToUserId, SlaDueAt, SlaCalculator.GetState(Status, SlaDueAt, CreatedAt, now),
+            IsEscalated, CreatedAt, UpdatedAt);
     }
 
     internal static TicketListItemDto ToListItem(Ticket t, DateTime now) =>
