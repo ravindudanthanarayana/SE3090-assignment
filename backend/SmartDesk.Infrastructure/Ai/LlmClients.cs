@@ -16,6 +16,9 @@ public sealed class LlmOptions
     public string ApiKey { get; set; } = string.Empty;
     public string Model { get; set; } = "gemini-3.1-flash-lite";
     public string BaseUrl { get; set; } = "https://generativelanguage.googleapis.com/v1beta";
+
+    /// <summary>Maximum time to wait for one live provider response before safe fallback.</summary>
+    public int FallbackTimeoutSeconds { get; set; } = 3;
 }
 
 /// <summary>
@@ -124,19 +127,29 @@ public sealed class GeminiLlmClient(HttpClient http, LlmOptions options, ILogger
 public sealed class ResilientLlmClient(
     GeminiLlmClient primary,
     ScriptedLlmClient fallback,
+    LlmOptions options,
     ILogger<ResilientLlmClient> logger) : ILlmClient
 {
     public string ProviderName => $"{primary.ProviderName} (scripted fallback enabled)";
 
     public async Task<string> CompleteJsonAsync(string systemPrompt, string userContent, CancellationToken ct = default)
     {
+        using var providerBudget = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        providerBudget.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, options.FallbackTimeoutSeconds)));
+
         try
         {
-            return await primary.CompleteJsonAsync(systemPrompt, userContent, ct);
+            return await primary.CompleteJsonAsync(systemPrompt, userContent, providerBudget.Token);
         }
         catch (DownstreamUnavailableException ex) when (!ct.IsCancellationRequested)
         {
             logger.LogWarning("LLM provider unavailable; using deterministic fallback: {Reason}", ex.Message);
+            return await fallback.CompleteJsonAsync(systemPrompt, userContent, ct);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        {
+            logger.LogWarning("LLM provider exceeded {TimeoutSeconds}s; using deterministic fallback",
+                options.FallbackTimeoutSeconds);
             return await fallback.CompleteJsonAsync(systemPrompt, userContent, ct);
         }
     }
