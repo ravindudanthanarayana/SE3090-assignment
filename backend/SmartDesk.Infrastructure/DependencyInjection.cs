@@ -92,6 +92,7 @@ public static class DependencyInjection
             services.AddScoped<ILlmClient>(sp => new ResilientLlmClient(
                 sp.GetRequiredService<GeminiLlmClient>(),
                 sp.GetRequiredService<ScriptedLlmClient>(),
+                sp.GetRequiredService<LlmOptions>(),
                 sp.GetRequiredService<ILogger<ResilientLlmClient>>()));
         }
         else
