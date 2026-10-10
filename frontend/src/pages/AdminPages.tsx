@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { adminApi } from '../api/endpoints';
+import { adminApi, assignmentApi } from '../api/endpoints';
 import { useApiResource, useDebounced } from '../hooks/useApiResource';
 import { errorMessage } from '../api/client';
 import { useToast } from '../context/ToastContext';
@@ -8,6 +8,7 @@ import { DataTable, type Column } from '../components/DataTable';
 import { Pagination } from '../components/Pagination';
 import { ConfirmDialog, Modal } from '../components/Modal';
 import { Select, TextInput } from '../components/Form';
+import { SkillDraftList, type SkillDraft } from '../components/AgentSkills';
 import { formatDateTime, prettyJson } from '../utils/format';
 import type { AuditLog, Category, Role, User } from '../types';
 
@@ -117,7 +118,8 @@ export function AdminUsers() {
       </AsyncState>
 
       <UserModal user={editing} onClose={() => setEditing(null)}
-                 onSaved={() => { setEditing(null); users.refetch(); toast.success('User saved.'); }} />
+                 onSaved={(message) => { setEditing(null); users.refetch(); toast.success(message); }}
+                 onPartialSave={(message) => { setEditing(null); users.refetch(); toast.error(message); }} />
 
       <ConfirmDialog
         open={deactivating !== null}
@@ -130,13 +132,15 @@ export function AdminUsers() {
   );
 }
 
-function UserModal({ user, onClose, onSaved }: {
-  user: User | 'new' | null; onClose: () => void; onSaved: () => void;
+function UserModal({ user, onClose, onSaved, onPartialSave }: {
+  user: User | 'new' | null; onClose: () => void;
+  onSaved: (message: string) => void; onPartialSave: (message: string) => void;
 }) {
   const isNew = user === 'new';
   const existing = user !== 'new' && user !== null ? user : null;
 
   const [form, setForm] = useState({ email: '', password: '', fullName: '', department: '', role: 'Employee' as Role, isActive: true });
+  const [skills, setSkills] = useState<SkillDraft[]>([]);
   const [key, setKey] = useState<number | 'new' | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -154,6 +158,7 @@ function UserModal({ user, onClose, onSaved }: {
       role: existing?.role ?? 'Employee',
       isActive: existing?.isActive ?? true,
     });
+    setSkills([]);
     setErrors({}); setFormError(null);
   }
 
@@ -174,17 +179,34 @@ function UserModal({ user, onClose, onSaved }: {
     setBusy(true);
     try {
       if (isNew) {
-        await adminApi.createUser({
+        const created = await adminApi.createUser({
           email: form.email.trim(), password: form.password, fullName: form.fullName.trim(),
           department: form.department.trim() || undefined, role: form.role,
         });
+
+        // Skills only apply to support agents. The user already exists at this point, so a failed
+        // skill is reported rather than undoing the account - it can be fixed on Agents & workload.
+        if (form.role === 'SupportAgent' && skills.length > 0) {
+          const results = await Promise.allSettled(
+            skills.map((skill) => assignmentApi.upsertSkill(created.id, skill)));
+          const failed = results.filter((r) => r.status === 'rejected').length;
+          if (failed > 0) {
+            onPartialSave(`${created.fullName} was created, but ${failed} of ${skills.length} skill(s) did not save. ` +
+              'Add them from Agents & workload.');
+            return;
+          }
+          onSaved(`${created.fullName} created with ${skills.length} skill(s).`);
+          return;
+        }
+        onSaved('User saved.');
+        return;
       } else if (existing) {
         await adminApi.updateUser(existing.id, {
           fullName: form.fullName.trim(), department: form.department.trim() || undefined,
           role: form.role, isActive: form.isActive,
         });
       }
-      onSaved();
+      onSaved('User saved.');
     } catch (error) {
       setFormError(errorMessage(error));
     } finally {
@@ -221,6 +243,10 @@ function UserModal({ user, onClose, onSaved }: {
                 onChange={(e) => setForm({ ...form, role: e.target.value as Role })}>
           {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
         </Select>
+
+        {isNew && form.role === 'SupportAgent' && (
+          <SkillDraftList value={skills} onChange={setSkills} disabled={busy} />
+        )}
 
         {!isNew && (
           <label className="flex items-center gap-2 text-sm text-fg">
