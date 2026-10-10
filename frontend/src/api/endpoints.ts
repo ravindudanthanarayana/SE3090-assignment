@@ -1,6 +1,6 @@
 import { api } from './client';
 import type {
-  AgentPerformance, AgentToolInfo, ArticleDetail, ArticleListItem, AssignmentRecommendation,
+  AgentPerformance, AgentSkill, AgentToolInfo, ArticleDetail, ArticleListItem, AssignmentRecommendation,
   AuditLog, AuthResponse, Category, Dashboard, PagedResult, SlaAtRiskTicket, SlaReport,
   SupportAgent, TicketComment, TicketDetail, TicketHistoryEntry, TicketListItem, TicketPriority,
   TicketStatus, User, WorkflowDetail, WorkflowListItem, Approval, ApprovalStatus, AgentWorkload,
@@ -94,7 +94,7 @@ export const assignmentApi = {
     api.get<AssignmentRecommendation>(`/api/assignments/recommendation/${ticketId}`).then((r) => r.data),
 
   upsertSkill: (userId: number, body: { categoryId: number; proficiencyLevel: number }) =>
-    api.put(`/api/support-agents/${userId}/skills`, body).then((r) => r.data),
+    api.put<AgentSkill>(`/api/support-agents/${userId}/skills`, body).then((r) => r.data),
 
   deleteSkill: (userId: number, skillId: number) =>
     api.delete(`/api/support-agents/${userId}/skills/${skillId}`),

@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { assignmentApi, reportsApi, ticketsApi } from '../api/endpoints';
 import { useApiResource } from '../hooks/useApiResource';
-import { AsyncState, Card, PriorityBadge, SlaBadge, StatCard, StatusBadge } from '../components/Ui';
+import { AsyncState, Button, Card, PriorityBadge, SlaBadge, StatCard, StatusBadge } from '../components/Ui';
+import { SkillEditorModal } from '../components/AgentSkills';
+import { useAuth } from '../context/AuthContext';
 import { DataTable, type Column } from '../components/DataTable';
 import { formatDateTime, formatHours } from '../utils/format';
 import type { AgentPerformance, SlaAtRiskTicket, SupportAgent } from '../types';
@@ -10,6 +13,11 @@ import type { AgentPerformance, SlaAtRiskTicket, SupportAgent } from '../types';
 /** Component B: agents, their skills and their live workload. */
 export function AgentsAndWorkload() {
   const agents = useApiResource(() => assignmentApi.supportAgents(), []);
+  const { hasRole } = useAuth();
+  // Only administrators may change skills; the API enforces the same rule with a 403.
+  const canEditSkills = hasRole('Admin');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const editing = agents.data?.find((a) => a.userId === editingId) ?? null;
 
   const columns: Column<SupportAgent>[] = [
     {
@@ -49,6 +57,15 @@ export function AgentsAndWorkload() {
       render: (a) => <span className={a.workload.breachedCount > 0 ? 'font-medium text-danger' : ''}>{a.workload.breachedCount}</span>,
     },
     { key: 'resolved', header: 'Resolved (30d)', render: (a) => a.workload.resolvedLast30Days },
+    ...(canEditSkills ? [{
+      key: 'actions',
+      header: '',
+      render: (a: SupportAgent) => (
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={() => setEditingId(a.userId)}>Edit skills</Button>
+        </div>
+      ),
+    }] : []),
   ];
 
   return (
@@ -57,6 +74,7 @@ export function AgentsAndWorkload() {
         <h1 className="text-xl font-semibold text-fg">Agents and workload</h1>
         <p className="mt-1 text-sm text-fg-subtle">
           The same skill levels and open-ticket counts the Assignment agent scores against.
+          {canEditSkills && ' Use Edit skills to change an agent\'s proficiency per category.'}
         </p>
       </header>
 
@@ -76,6 +94,8 @@ export function AgentsAndWorkload() {
           </>
         )}
       </AsyncState>
+
+      <SkillEditorModal agent={editing} onClose={() => setEditingId(null)} onChanged={agents.refetch} />
     </div>
   );
 }
